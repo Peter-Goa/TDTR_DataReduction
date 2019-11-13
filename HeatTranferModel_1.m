@@ -21,7 +21,6 @@ k = (0:dk:klimit)';         % variabel of hankel transform
 k2 = k.*k;     
 omegasize = length(omega);
 ksize = length(k);
-
 Nlayer=length(kz);
 q = zeros(ksize,omegasize,Nlayer);
 b = zeros(ksize,omegasize,Nlayer);
