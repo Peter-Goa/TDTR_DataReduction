@@ -51,7 +51,7 @@ config.fit_para = [
 ];  
 
 % the maximum iteration of the fitting process
-config.iteration = 300;
+config.iteration = 3000;
 
 % do fitting or don't do fitting. 0 - don't do fitting; 1 - do fitting
 config.fitting_mode = 1;
