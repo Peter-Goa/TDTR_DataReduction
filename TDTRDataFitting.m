@@ -9,91 +9,144 @@ function [Result] = TDTRDataFitting(raw_data)
 % Date: Nov. 14, 2019
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 
-global config;
-global cal_para;
-% the time at which the value will be used to normalize amplitude of data [s]
-cal_para.norm_time = 1.00E-10;
-% modulation frequency [Hz]
-cal_para.omega_0 = 2*pi*config.f_mod;
-% laser reputation frequency
-cal_para.omega_s=2*pi*80.21*10^6;
-%------->Here
+    global config;
+    global cal_para;
+    % the time at which the value will be used to normalize amplitude of data [s]
+    cal_para.norm_time = 1.00E-10;
+    % modulation frequency [Hz]
+    cal_para.omega_0 = 2*pi*config.f_mod;
+    % laser reputation frequency
+    cal_para.omega_s=2*pi*80.21*10^6;
+    % the k in equation 3.27, which is used to consider the accumulation
+    % effects
+    kmax_n = 15000;
+    cal_para.k_n = (-kmax_n:kmax_n);
+    cal_para.omega = cal_para.omega_0+k_n*cal_para.omega_s;
+    % the fitting method is a matlab built-in function named ganatic algorithm
+    % do some processing on the raw data
+    tau_raw = raw_data(:,1)*1E-9;
+    X_raw = raw_data(:,2);
+    Y_raw = raw_data(:,3);
+    % make the time whose X value is maximum is zero
+    [~, tau_zero_index] = max(X_raw);
+    tau_zero = tau_raw(tau_zero_index);
+    tau_raw = tau_raw - tau_zero;
+    % shift phase to make Y value have minimum skip at time 0
+    options_phase = optimset('Display','iter','MaxFunEvals',200,'TolFun',1e-14,'TolX',1e-14);
+    phase_shift_rad = 0.1;
+    phase_shift_rad = fminsearch(@(phase_shift_rad) SetPhaseRatio(tau_raw, X_raw, Y_raw, phase_shift_rad, tau_zero_index), phase_shift_rad, options_phase);
+    X_fixed = X_raw.*cos(phase_shift_rad)-Y_raw.*sin(phase_shift_rad);
+    Y_fixed = X_raw.*sin(phase_shift_rad)+Y_raw.*cos(phase_shift_rad);
+    Ndata=length(tau_raw);
+    Nmin=Ndata;
+    for i=Ndata:-1:1
+        if tau_raw(i)>=config.tau(1)
+            Nmin=i;
+        end
+    end
+    Nmax=Nmin;
+    for i=Nmin:Ndata
+        if tau_raw(i)<=config.tau(2)
+            Nmax=i;
+        end
+    end
 
-
-
-
-% the fitting method is a matlab built-in function named ganatic algorithm
-% do some processing on the raw data
-tau_raw = raw_data(:,1)*1E-9;
-tau_raw_ns = raw_data(:,1);
-X_raw = raw_data(:,2);
-Y_raw = raw_data(:,3);
-fun_raw = swit_fun(X_raw,Y_raw,tau_raw);
-multiple_control = [0,0];
-multiple_UB = [3,4];
-multiple_LB = [-2,-4];
-% 0 means the calculate is rejected and 1(not 0) means the calcualte is pass 
-isPass = 0;
-% 0 means no error rised during calculation and 1(not 0) means some errors rised.
-isError = 0; 
-
-% the method which decides whether the result pass or not concludes several 
-% steps:
-% 1. the acceptable range of the result is [low_band*1.3, high_band*0.9]
-% 2. if the result did not pass, the center value should multiply 5 or 1/5
-% 3. the range used in ganatic algorithm is [center_value*0.3,center_value*3]
-while isPass == 0
-    % ********************************************************************
-    % Loss function
-    % this section should be rewrited if you want to calculate other value
-    % in your code!!!
-    % ********************************************************************
-    ky_1 = Meas_Conf.ky_1*(5^multiple_control(1));
-    R = Meas_Conf.R*(5^multiple_control(2));
+    %------ extract min to max part from raw_data -----------
+    tau_data=tau_raw(Nmin:Nmax,1)';
+    X_data=X_fixed(Nmin:Nmax,1)';
+    Y_data=Y_fixed(Nmin:Nmax,1)';
+    fun_data = swit_fun(X_data,Y_data,tau_data);
+    Result.dealed_data.tau = tau_data*1E9;
+    Result.dealed_data.fun = fun_data;
+    NVars = size(config.fit_para,1);
+    % 0 means no error rised during calculation and 1(not 0) means some errors rised.
+    isError = 0;
+    value_0 = config.fit_para(:, 3)';
+    lb = config.fit_para(:, 4)./value_0;
+    ub(index) = config.fit_para(:, 5)./value_0;
     %func = @(beta) getDevOfT_P(k_0, beta(1)*ky_1, beta(2)*kxy_1, k_2, Cv_0, beta(3)*Cv_1, Cv_2, d, freq, b, beta(4)*R, l, T_P_Exp);
-    func = @(beta) getDevOfT_P(k_0, beta(1)*ky_1, kxy_1, k_2, Cv_0, Cv_1, Cv_2, d_1, d_2, freq, b, beta(2)*R, l, T_P_Exp);
+    func = @(beta) Costfunction_assist(beta, tau_data, fun_data);
 
     %Genetic algorithm
     options = gaoptimset('Display','final','UseParallel', true,'Generations',config.iteration,'TolCon',1E-9);
-    lb = [0.3 0.3];
-    ub = [3 3];
-    NVars = 2;
+
     try
     beta = ga(func, NVars, [], [], [], [], lb, ub, [], options);
+    Loss = func(beta);
     catch
         disp('We found an error during using ga function! Then we will skip this task and continue with next one.');
         isError = 1;% 0 means no error rised during calculation and 1(not 0) means 
         % some errors rised. 
-        isPass = 0;
         Loss = 0;
-        beta = [0 0];
-        break
-    end
-    if (beta(1)>0.4)&&(beta(1)<2.7)&&(beta(2)>0.4)&&(beta(2)<2.7)
-        isPass = 1;
-    else
-        if beta(1)<0.4
-            multiple_control(1) = multiple_control(1) - 1;
-        end
-        if beta(1)>2.7
-            multiple_control(1) = multiple_control(1)+1;
-        end
-        if beta(2)<0.4
-            multiple_control(2) = multiple_control(2)-1;
-        end
-        if beta(2)>2.7
-            multiple_control(2) = multiple_control(2)+1;
-        end
-        isPass = 0;
-    end
-    if (multiple_control(1)<multiple_LB(1))||(multiple_control(1)>multiple_UB(1))||(multiple_control(2)<multiple_LB(2))||(multiple_control(2)>multiple_UB(2))
-        isPass = 0;
-        disp('The method can not find an eligible solution!!!');
-        break
-    end
-    Loss = func(beta);
+        beta = zeros(1,NVar);
+    end    
+    Result.StdDev = Loss;
+    Result.isError = isError;
+    Result.fittingValue = beta.*value_0;
+    Result.theory_data.tau = tau_data;
+    Result.theory_data.fun = TheoryFun_assist(beta,tau_data);
 end
-result.Loss = Loss;
-result.isPass = isPass;
-result.isError = isError;
-result.value = [beta(1)*ky_1,beta(2)*R];
+
+function [cost] = Costfunction_assist(beta, tau_data, fun_data)
+    global config;
+    value_0 = config.fit_para(:, 3)';
+    NVars = size(config.fit_para,1);
+    kz = config.kz;
+    kr = config.kr;
+    G = config.G;
+    vhc = config.vhc;
+    d = config.d;
+    for index = 1:1:NVars
+        switch config.fit_para(index,2)
+            case 1
+                kz(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 2
+                kr(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 3
+                vhc(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 4
+                d(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 5
+                G(config.fit_para(index,1)) = value_0(index)*beta(index);
+        end
+    end
+    NLayer = size(config.kz, 2);
+    for index = 1:1:NLayer
+        if config.iso(index) == 0
+            kr(index) = kz(index);
+        end
+    end
+    [cost] = Costfunction(kz,kr,G,d,vhc,config.w,tau_data,fun_data);
+end
+
+function [func] = TheoryFun_assist(beta, tau_data)
+    global config;
+    value_0 = config.fit_para(:, 3)';
+    NVars = size(config.fit_para,1);
+    kz = config.kz;
+    kr = config.kr;
+    G = config.G;
+    vhc = config.vhc;
+    d = config.d;
+    for index = 1:1:NVars
+        switch config.fit_para(index,2)
+            case 1
+                kz(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 2
+                kr(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 3
+                vhc(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 4
+                d(config.fit_para(index,1)) = value_0(index)*beta(index);
+            case 5
+                G(config.fit_para(index,1)) = value_0(index)*beta(index);
+        end
+    end
+    NLayer = size(config.kz, 2);
+    for index = 1:1:NLayer
+        if config.iso(index) == 0
+            kr(index) = kz(index);
+        end
+    end
+    func = TheoryData(kz,kr,G,d,vhc,config.w,tau_data);
+end

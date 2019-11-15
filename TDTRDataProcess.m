@@ -82,15 +82,15 @@ if config.fitting_mode == 1
         img_folder = fullfile(OutputFolder,'img');
         mkdir(img_folder);
         % make the raw data folder
-        % there are three columns in each file, which are time(nm), x, y
+        % there are three columns in each file, which are time(ns), x, y
         raw_data_folder = fullfile(OutputFolder,'raw_data');
         mkdir(raw_data_folder);
         % make the dealed raw data folder
-        % there are two columns on each file, which are time(nm), fun
+        % there are two columns on each file, which are time(ns), fun
         dealed_data_folder = fullfile(OutputFolder,'dealed_data');
         mkdir(dealed_data_folder);
         % the theory data folder
-        % there are two columns on each file, which are time(nm), fun
+        % there are two columns on each file, which are time(ns), fun
         theory_data_folder = fullfile(OutputFolder,'theory_data');
         mkdir(theory_data_folder);
         % copy the configuration file to output folder

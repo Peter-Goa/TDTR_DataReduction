@@ -9,6 +9,7 @@ config.kz = [240, 0.3, 140];
 config.kr = [240, 0.3, 140];
 
 % isotropy or anisotropy for each layer. 0 - isotropy; 1 - anisotropy
+% if a material is isotropy, please use the kz for fitting
 config.iso = [0, 0, 0];
 
 % Interfacial thermal conductance between each layer[W/m^2K]
@@ -44,7 +45,7 @@ config.mode = 'r';
 config.folder_mode = 1;
 
 % parameters which will be fitting. It is a Npara matrix*5. 5 lines are Layer, Type, GaussValue, MinValue, MaxValue.
-% Npara is the number of fitting parameter. Type can be one of the list{1 - 'kz', 2 - 'kr', 3 - 'vhc', 4 - 'd'}.
+% Npara is the number of fitting parameter. Type can be one of the list{1 - 'kz', 2 - 'kr', 3 - 'vhc', 4 - 'd', 5 - 'G'}.
 config.fit_para = [
 1, 3, 2.4E6, 2E6, 3E6
 2, 1, 0.33, 1, 0.1
