@@ -52,101 +52,53 @@ function [Result] = TDTRDataFitting(raw_data)
     end
 
     %------ extract min to max part from raw_data -----------
-    tau_data=tau_raw(Nmin:Nmax,1)';
-    X_data=X_fixed(Nmin:Nmax,1)';
-    Y_data=Y_fixed(Nmin:Nmax,1)';
-    fun_data = swit_fun(X_data,Y_data,tau_data);
+    tau_data = tau_raw(Nmin:Nmax,1)';
+    X_data = X_fixed(Nmin:Nmax,1)';
+    Y_data = Y_fixed(Nmin:Nmax,1)';
+    fun_data = swit_fun(X_data,Y_data,tau_data, config);
     Result.dealed_data.tau = tau_data*1E9;
     Result.dealed_data.fun = fun_data;
     NVars = size(config.fit_para,1);
     % 0 means no error rised during calculation and 1(not 0) means some errors rised.
     isError = 0;
     value_0 = config.fit_para(:, 3)';
+    value_0_unit = value_0;
+    for index = 1:1:NVars
+        switch config.fit_para(index,2)
+            case 1
+                value_0_unit(index) = value_0(index);
+            case 2
+                value_0_unit(index) = value_0(index);
+            case 3
+                value_0_unit(index) = value_0(index)/1E6;
+            case 4
+                value_0_unit(index) = value_0(index)*1E9;
+            case 5
+                value_0_unit(index) = value_0(index)/1E6;
+        end
+    end
     lb = config.fit_para(:, 4)'./value_0;
     ub = config.fit_para(:, 5)'./value_0;
     %func = @(beta) getDevOfT_P(k_0, beta(1)*ky_1, beta(2)*kxy_1, k_2, Cv_0, beta(3)*Cv_1, Cv_2, d, freq, b, beta(4)*R, l, T_P_Exp);
-    func = @(beta) Costfunction_assist(beta, tau_data, fun_data);
+    func = @(beta) Costfunction_assist(beta, tau_data, fun_data, config, cal_para);
 
     %Genetic algorithm
-    options = gaoptimset('Display','final','UseParallel', true,'Generations',config.iteration,'TolCon',1E-9);
+%    options = gaoptimset('Display','final','UseParallel', false,'Generations',config.iteration,'TolCon',1E-9);
+    options = gaoptimset('Display','iter','UseParallel', true,'Generations',config.iteration,'TolCon',1E-9);
 
-    try
-    beta = ga(func, NVars, [], [], [], [], lb, ub, [], options);
-    Loss = func(beta);
-    catch
-        disp('We found an error during using ga function! Then we will skip this task and continue with next one.');
-        isError = 1;% 0 means no error rised during calculation and 1(not 0) means 
-        % some errors rised. 
-        Loss = 0;
-        beta = zeros(1,NVar);
-    end    
+%     try
+      beta = ga(func, NVars, [], [], [], [], lb, ub, [], options);
+      Loss = func(beta);
+%     catch
+%         disp('We found an error during using ga function!');
+%         isError = 1;% 0 means no error rised during calculation and 1(not 0) means 
+%         % some errors rised. 
+%         Loss = 0;
+%         beta = zeros(1,NVars);
+%     end    
     Result.StdDev = Loss;
     Result.isError = isError;
-    Result.fittingValue = beta.*value_0;
-    Result.theory_data.tau = tau_data;
-    Result.theory_data.fun = TheoryFun_assist(beta,tau_data);
-end
-
-function [cost] = Costfunction_assist(beta, tau_data, fun_data)
-    global config;
-    value_0 = config.fit_para(:, 3)';
-    NVars = size(config.fit_para,1);
-    kz = config.kz;
-    kr = config.kr;
-    G = config.G;
-    vhc = config.vhc;
-    d = config.d;
-    for index = 1:1:NVars
-        switch config.fit_para(index,2)
-            case 1
-                kz(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 2
-                kr(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 3
-                vhc(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 4
-                d(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 5
-                G(config.fit_para(index,1)) = value_0(index)*beta(index);
-        end
-    end
-    NLayer = size(config.kz, 2);
-    for index = 1:1:NLayer
-        if config.iso(index) == 0
-            kr(index) = kz(index);
-        end
-    end
-    [cost] = Costfunction(kz,kr,G,d,vhc,config.w,tau_data,fun_data);
-end
-
-function [func] = TheoryFun_assist(beta, tau_data)
-    global config;
-    value_0 = config.fit_para(:, 3)';
-    NVars = size(config.fit_para,1);
-    kz = config.kz;
-    kr = config.kr;
-    G = config.G;
-    vhc = config.vhc;
-    d = config.d;
-    for index = 1:1:NVars
-        switch config.fit_para(index,2)
-            case 1
-                kz(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 2
-                kr(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 3
-                vhc(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 4
-                d(config.fit_para(index,1)) = value_0(index)*beta(index);
-            case 5
-                G(config.fit_para(index,1)) = value_0(index)*beta(index);
-        end
-    end
-    NLayer = size(config.kz, 2);
-    for index = 1:1:NLayer
-        if config.iso(index) == 1
-            kr(index) = kz(index);
-        end
-    end
-    func = TheoryData(kz,kr,G,d,vhc,config.w,tau_data);
+    Result.fittingValue = beta.*value_0_unit;
+    Result.theory_data.tau = tau_data*1E9;
+    Result.theory_data.fun = TheoryFun_assist(beta,tau_data, config, cal_para);
 end

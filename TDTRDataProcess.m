@@ -59,7 +59,7 @@ if config.fitting_mode == 1
         IsNotExist = 0;
         index = 1;
         while IsNotExist == 0
-            OutputFolder = [datatime('now'), '_', num2str(index)];
+            OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
             OutputFolder = fullfile(OutputPath, OutputFolder);
             if exist(OutputFolder,'dir') == 0
                 IsNotExist = 1;
@@ -187,7 +187,7 @@ if config.fitting_mode == 1
         result_file = fopen(fullfile(OutputFolder,'result_log.txt'),'a+');
                 
         disp(['Filename: ', filename]);
-        fprintf(result_file,'Filename: %s',filename);
+        fprintf(result_file,'Filename: %s\r\n',filename);
         % read raw data
         raw_data = load(SourcePath);
         % do the fitting and get result
@@ -224,12 +224,12 @@ if config.fitting_mode == 1
         end
         saveas(fig,fullfile(OutputFolder,filename(1:end-4)),'png');
         % diaplay the result of fitting
-        diap(para_name);
-        diap(Result.fittingValue);
+        disp(para_name);
+        disp(Result.fittingValue);
         disp(['The standard deviation is ', num2str(Result.StdDev)]);
         % save the fitting result to result_log file
         fprintf(result_file,'%s\r\n',para_name);
-        fprintf(result_file,'%f%f%f%f',Result.fittingValue);
+        fprintf(result_file,'%f  %f  %f  %f\r\n',Result.fittingValue);
         fprintf(result_file,'%s\r\n',['The standard deviation is ', num2str(Result.StdDev)]);
         fclose(result_file);
     end   

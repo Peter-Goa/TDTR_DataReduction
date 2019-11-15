@@ -1,5 +1,4 @@
-function[origin_fun] = swit_fun(X,Y,time)
-    global config
+function[origin_fun] = swit_fun(X,Y,time,config)
 
     switch config.mode
         case 'r'

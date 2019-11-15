@@ -1,4 +1,4 @@
-function [H] = HeatTranferModel_1(kz,kr,G,d,vhc,w)
+function [H] = HeatTranferModel_1(kz,kr,G,d,vhc,w, config, cal_para)
 % Heat tranfer model by the method in the thesis of Aaron Jerome Schmidt (equation 3.50).
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
@@ -10,9 +10,9 @@ function [H] = HeatTranferModel_1(kz,kr,G,d,vhc,w)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 
 %Global Variable
-global omega            % Matrix (1 X omegasize).
-global two_way          % Mark. 0, Equation 3.50; 1, Unknown. 
-global radial_mode      % Mark. 0, one dimensional heat transfer; 1, two dimentional heat transfer
+omega = cal_para.omega;            % Matrix (1 X omegasize).
+two_way = config.two_way;          % Mark. 0, Equation 3.50; 1, Unknown. 
+radial_mode = config.radial_mode;  % Mark. 0, one dimensional heat transfer; 1, two dimentional heat transfer
 
 alpha = kz./vhc;            % thermal diffusivity.
 klimit = 10/sqrt(w*w');     % upper limit of k
@@ -46,7 +46,7 @@ if two_way == 0
     Ctemp1 = c(:,:,Nlayer);
     Dtemp1 = ones(ksize,omegasize);
     for index = Nlayer-1:-1:1
-        Ctemp2 = Ctemp1 + (-Ctemp/G(index)+Dtemp).*c(:,:,index);
+        Ctemp2 = Ctemp1 + (-Ctemp1/G(index)+Dtemp1).*c(:,:,index);
         Dtemp2 = Ctemp1.*b(:,:,index)-Ctemp1/G(index)+Dtemp1;
         Ctemp1 = Ctemp2;
         Dtemp1 = Dtemp2;
