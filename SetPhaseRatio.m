@@ -9,7 +9,7 @@ tau_range_max = 80*10^-12;
 Y_fixed = X_raw.*sin(phase_shift)+Y_raw.*cos(phase_shift);
 
 t_data_minus = tau_raw(1:tau_zero_index-2);
-t_data_plus = tau_raw(tau_zero:end);
+t_data_plus = tau_raw(tau_zero_index:end);
 
 Y_data_minus = Y_fixed(1:tau_zero_index-2);
 Y_data_plus = Y_fixed(tau_zero_index:end);

@@ -21,7 +21,7 @@ function [Result] = TDTRDataFitting(raw_data)
     % effects
     kmax_n = 15000;
     cal_para.k_n = (-kmax_n:kmax_n);
-    cal_para.omega = cal_para.omega_0+k_n*cal_para.omega_s;
+    cal_para.omega = cal_para.omega_0+cal_para.k_n*cal_para.omega_s;
     % the fitting method is a matlab built-in function named ganatic algorithm
     % do some processing on the raw data
     tau_raw = raw_data(:,1)*1E-9;
@@ -62,8 +62,8 @@ function [Result] = TDTRDataFitting(raw_data)
     % 0 means no error rised during calculation and 1(not 0) means some errors rised.
     isError = 0;
     value_0 = config.fit_para(:, 3)';
-    lb = config.fit_para(:, 4)./value_0;
-    ub(index) = config.fit_para(:, 5)./value_0;
+    lb = config.fit_para(:, 4)'./value_0;
+    ub = config.fit_para(:, 5)'./value_0;
     %func = @(beta) getDevOfT_P(k_0, beta(1)*ky_1, beta(2)*kxy_1, k_2, Cv_0, beta(3)*Cv_1, Cv_2, d, freq, b, beta(4)*R, l, T_P_Exp);
     func = @(beta) Costfunction_assist(beta, tau_data, fun_data);
 
@@ -144,7 +144,7 @@ function [func] = TheoryFun_assist(beta, tau_data)
     end
     NLayer = size(config.kz, 2);
     for index = 1:1:NLayer
-        if config.iso(index) == 0
+        if config.iso(index) == 1
             kr(index) = kz(index);
         end
     end

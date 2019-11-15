@@ -10,24 +10,22 @@ function [] = TDTRDataProcess()
 % Author: RL
 % Date: Nov. 12, 2019
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
-
-global config
 clc,clear,clf
+global config
 set(0,'defaultAxesFontSize',30)
 set(0,'defaultTextFontSize',30)
 set(0,'defaultAxesFontName','Helvetica')
 set(0,'defaultTextFontName','Helvetica')
 fPosition = [1 1 1400 1200];
-length_para = size(config.fit_para,1);
-
 % the configuration file
-[filename, path] = uigetfile('*.txt','Pick a configuration file');
-if isequal(filename,0) || isequal(pathname,0)
+[filename, path] = uigetfile('*.m','Pick a configuration file');
+if isequal(filename,0) || isequal(path,0)
     disp('User pressed cancel')
     return
 end
 config_file = fullfile(path, filename);
 run(config_file);
+length_para = size(config.fit_para,1);
 para_name = '';
 for index_para = 1:1:length_para
     para_name = [para_name, config.LayerName{config.fit_para(index_para,1)}, '_'];
@@ -40,6 +38,8 @@ for index_para = 1:1:length_para
             para_name = [para_name, 'vhc [MW/m^3K]'];
         case 4
             para_name = [para_name, 'd [nm]'];
+        case 5
+            para_name = [para_name, 'G [W/m^2K]'];
     end
     para_name = [para_name, '   ']; 
 end
@@ -160,7 +160,7 @@ if config.fitting_mode == 1
     else
         % the folder or file path of the data
         [filename, path] = uigetfile('*.txt','Pick a data file');
-        if isequal(filename,0) || isequal(pathname,0)
+        if isequal(filename,0) || isequal(path,0)
             disp('User pressed cancel')
             return
         end
@@ -170,7 +170,7 @@ if config.fitting_mode == 1
         IsNotExist = 0;
         index = 1;
         while IsNotExist == 0
-            OutputFolder = [datatime('now'), '_', num2str(index)];
+            OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
             OutputFolder = fullfile(OutputPath, OutputFolder);
             if exist(OutputFolder,'dir') == 0
                 IsNotExist = 1;
