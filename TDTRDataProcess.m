@@ -44,6 +44,12 @@ for index_para = 1:1:length_para
     para_name = [para_name, '   ']; 
 end
 
+format_f = '';
+for index = 1:1:length_para
+    format_f = [format_f '%f  '];
+end
+format_f = [format_f '\r\n'];
+
 % fitting the data to get wanted parameters
 if config.fitting_mode == 1
     % all data files in the selected folder will be processed
@@ -112,11 +118,11 @@ if config.fitting_mode == 1
             copyfile(fullfile(SourcePath, filelist(index).name), raw_data_file);
             % save the dealed data file to output folder
             dealed_data_file = fopen(fullfile(dealed_data_folder, filelist(index).name),'w+');
-            fprintf(dealed_data_file, '%f\t%f\r\n', [Result.dealed_data.tau(:)'/1E-9; Result.dealed_data.fun(:)']);
+            fprintf(dealed_data_file, '%f\t%f\r\n', [Result.dealed_data.tau(:)'; Result.dealed_data.fun(:)']);
             fclose(dealed_data_file);
             % save the theory data to output file
             theory_data_file = fopen(fullfile(theory_data_folder, filelist(index).name),'w+');
-            fprintf(theory_data_file, '%f\t%f\r\n', [Result.theory_data.tau(:)'/1E-9; Result.theory_data.fun(:)']);
+            fprintf(theory_data_file, '%f\t%f\r\n', [Result.theory_data.tau(:)'; Result.theory_data.fun(:)']);
             fclose(theory_data_file);
             % save the figure of dealed raw data and theory data to output file
             fig = figure('Position', fPosition);
@@ -139,22 +145,30 @@ if config.fitting_mode == 1
             end
             saveas(fig,fullfile(img_folder,filelist(index).name(1:end-4)),'png');
             % diaplay the result of fitting
-            diap(para_name);
-            diap(Result.fittingValue);
+            disp(para_name);
+            disp(Result.fittingValue);
             disp(['The standard deviation is ', num2str(Result.StdDev)]);
             % save the fitting result to result_log file
             fprintf(result_file,'%s\r\n',para_name);
-            fprintf(result_file,'%f%f%f%f',Result.fittingValue);
+            fprintf(result_file,format_f,Result.fittingValue);
             fprintf(result_file,'%s\r\n',['The standard deviation is ', num2str(Result.StdDev)]);
             Results(index,:) = Result.fittingValue;
-            disp('Summary of the results');
-            disp(Results);
-            disp('The average value');
-            disp(mean(Results,1));
-            disp('The standard deviation');
-            disp(std(Results,0,1));
-            fclose(result_file);
         end
+        disp('Summary of the results');
+        disp(para_name);
+        disp(Results);
+        disp('The average value');
+        disp(mean(Results,1));
+        disp('The standard deviation');
+        disp(std(Results,0,1));
+        fprintf(result_file,'\r\n%s\r\n','Summary of the results');
+        fprintf(result_file,'%s\r\n',para_name);
+        fprintf(result_file,format_f,Results);
+        fprintf(result_file,'%s\r\n','The average value');
+        fprintf(result_file,format_f,mean(Results,1));
+        fprintf(result_file,'%s\r\n','The standard deviation');
+        fprintf(result_file,format_f,std(Results,0,1));
+        fclose(result_file);
         
     % a selected file will be processed
     else
@@ -197,11 +211,11 @@ if config.fitting_mode == 1
         copyfile(SourcePath, raw_data_file);
         % save the dealed data file to output folder
         dealed_data_file = fopen(fullfile(OutputFolder, [filename(1:end-4), '_dealed_data.txt']),'w+');
-        fprintf(dealed_data_file, '%f\t%f\r\n', [Result.dealed_data.tau(:)'/1E-9; Result.dealed_data.fun(:)']);
+        fprintf(dealed_data_file, '%f\t%f\r\n', [Result.dealed_data.tau(:)'; Result.dealed_data.fun(:)']);
         fclose(dealed_data_file);
         % save the theory data to output file
         theory_data_file = fopen(fullfile(OutputFolder, [filename(1:end-4), '_theory_data.txt']),'w+');
-        fprintf(theory_data_file, '%f\t%f\r\n', [Result.theory_data.tau(:)'/1E-9; Result.theory_data.fun(:)']);
+        fprintf(theory_data_file, '%f\t%f\r\n', [Result.theory_data.tau(:)'; Result.theory_data.fun(:)']);
         fclose(theory_data_file);
         % save the figure of dealed raw data and theory data to output file
         fig = figure('Position', fPosition);
@@ -229,7 +243,7 @@ if config.fitting_mode == 1
         disp(['The standard deviation is ', num2str(Result.StdDev)]);
         % save the fitting result to result_log file
         fprintf(result_file,'%s\r\n',para_name);
-        fprintf(result_file,'%f  %f  %f  %f\r\n',Result.fittingValue);
+        fprintf(result_file,format_f,Result.fittingValue);
         fprintf(result_file,'%s\r\n',['The standard deviation is ', num2str(Result.StdDev)]);
         fclose(result_file);
     end   
