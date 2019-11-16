@@ -1,16 +1,20 @@
-function [] = TDTRDataProcess()
+function [] = TDTRDataProcess(varargin)
 % Main function for the TDTR data processing.
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % TDTRDataProcess
 % Main function for the TDTR data processing.
+% This function can get three input, the dir for configuration file, the
+% dir for data file/folder, the dir for output folder
 % Reference:
 % 1. main_TDTR_171120 in TDTR_Iwamoto_171120
 % 2. The thesis of Aaron Jerome Schmidt
 % Author: RL
 % Date: Nov. 12, 2019
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
-clc,clear,clf
+close all
+withInput = nargin;
+
 global config
 set(0,'defaultAxesFontSize',30)
 set(0,'defaultTextFontSize',30)
@@ -18,12 +22,16 @@ set(0,'defaultAxesFontName','Helvetica')
 set(0,'defaultTextFontName','Helvetica')
 fPosition = [1 1 1400 1200];
 % the configuration file
-[filename, path] = uigetfile('*.m','Pick a configuration file');
-if isequal(filename,0) || isequal(path,0)
-    disp('User pressed cancel')
-    return
+if withInput >= 1
+    config_file = varargin{1};
+else
+    [filename, path] = uigetfile('*.m','Pick a configuration file');
+    if isequal(filename,0) || isequal(path,0)
+        disp('User pressed cancel')
+        return
+    end
+    config_file = fullfile(path, filename);
 end
-config_file = fullfile(path, filename);
 run(config_file);
 length_para = size(config.fit_para,1);
 para_name = '';
@@ -55,13 +63,25 @@ if config.fitting_mode == 1
     % all data files in the selected folder will be processed
     if config.folder_mode == 1
         % the folder or file path of the data
-        SourcePath = uigetdir('.','Pick a folder where there are data files');
-        if isequal(SourcePath,0)
-            disp('User pressed cancel')
-            return
+        if withInput >= 2
+            SourcePath = varargin{2};
+        else
+            SourcePath = uigetdir('.','Pick a folder where there are data files');
+            if isequal(SourcePath,0)
+                disp('User pressed cancel')
+                return
+            end
         end
         % the folder to storage the result files
-        OutputPath = uigetdir('.','Pick a folder to storage the results');
+        if withInput >= 3
+            OutputPath = varargin{3};
+        else
+            OutputPath = uigetdir('.','Pick a folder to storage the results');
+            if isequal(OutputPath,0)
+                disp('User pressed cancel')
+                return
+            end
+        end
         IsNotExist = 0;
         index = 1;
         while IsNotExist == 0
@@ -72,7 +92,7 @@ if config.fitting_mode == 1
             else
                 index = index + 1;
             end
-        end      
+        end
         % get the files in the SourcePath
         filelist = dir([SourcePath '\*.txt']);
         length_filelist = length(filelist);
@@ -173,14 +193,26 @@ if config.fitting_mode == 1
     % a selected file will be processed
     else
         % the folder or file path of the data
-        [filename, path] = uigetfile('*.txt','Pick a data file');
-        if isequal(filename,0) || isequal(path,0)
-            disp('User pressed cancel')
-            return
+        if withInput >= 2
+            SourcePath = varargin{2};
+        else
+            [filename, path] = uigetfile('*.txt','Pick a data file');
+            if isequal(filename,0) || isequal(path,0)
+                disp('User pressed cancel')
+                return
+            end
+            SourcePath = fullfile(path, filename);
         end
-        SourcePath = fullfile(path, filename);
         % the folder to storage the result files
-        OutputPath = uigetdir('.','Pick a folder to storage the results');
+        if withInput >= 3
+            OutputPath = varargin{3};
+        else
+            OutputPath = uigetdir('.','Pick a folder to storage the results');
+            if isequal(OutputPath,0)
+                disp('User pressed cancel')
+                return
+            end
+        end
         IsNotExist = 0;
         index = 1;
         while IsNotExist == 0
