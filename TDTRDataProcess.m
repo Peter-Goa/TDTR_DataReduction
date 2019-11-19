@@ -170,7 +170,7 @@ if config.fitting_mode == 1
             disp(['The standard deviation is ', num2str(Result.StdDev)]);
             % save the fitting result to result_log file
             fprintf(result_file,'%s\r\n',para_name);
-            fprintf(result_file,format_f,Result.fittingValue);
+            fprintf(result_file,format_f,Result.fittingValue');
             fprintf(result_file,'%s\r\n',['The standard deviation is ', num2str(Result.StdDev)]);
             Results(index,:) = Result.fittingValue;
         end
