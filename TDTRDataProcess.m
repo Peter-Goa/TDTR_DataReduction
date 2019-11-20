@@ -185,7 +185,7 @@ if config.fitting_mode == 1
         disp(std(Results,0,1));
         fprintf(result_file,'\r\n%s\r\n','Summary of the results');
         fprintf(result_file,'%s\r\n',para_name);
-        fprintf(result_file,format_f,Results);
+        fprintf(result_file,format_f,Results');
         fprintf(result_file,'%s\r\n','The average value');
         fprintf(result_file,format_f,mean(Results,1));
         fprintf(result_file,'%s\r\n','The standard deviation');
