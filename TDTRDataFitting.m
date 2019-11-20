@@ -10,18 +10,6 @@ function [Result] = TDTRDataFitting(raw_data)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 
     global config;
-    global cal_para;
-    % the time at which the value will be used to normalize amplitude of data [s]
-    cal_para.norm_time = 1.00E-10;
-    % modulation frequency [Hz]
-    cal_para.omega_0 = 2*pi*config.f_mod;
-    % laser reputation frequency
-    cal_para.omega_s=2*pi*80.21*10^6;
-    % the k in equation 3.27, which is used to consider the accumulation
-    % effects
-    kmax_n = 15000;
-    cal_para.k_n = (-kmax_n:kmax_n);
-    cal_para.omega = cal_para.omega_0+cal_para.k_n*cal_para.omega_s;
     % the fitting method is a matlab built-in function named ganatic algorithm
     % do some processing on the raw data
     tau_raw = raw_data(:,1)*1E-9;
@@ -80,7 +68,7 @@ function [Result] = TDTRDataFitting(raw_data)
     lb = config.fit_para(:, 4)'./value_0;
     ub = config.fit_para(:, 5)'./value_0;
     %func = @(beta) getDevOfT_P(k_0, beta(1)*ky_1, beta(2)*kxy_1, k_2, Cv_0, beta(3)*Cv_1, Cv_2, d, freq, b, beta(4)*R, l, T_P_Exp);
-    func = @(beta) Costfunction_assist(beta, tau_data, fun_data, config, cal_para);
+    func = @(beta) Costfunction_assist(beta, tau_data, fun_data, config);
 
     %Genetic algorithm
 %    options = gaoptimset('Display','final','UseParallel', false,'Generations',config.iteration,'TolCon',1E-9);
@@ -100,5 +88,5 @@ function [Result] = TDTRDataFitting(raw_data)
     Result.isError = isError;
     Result.fittingValue = beta.*value_0_unit;
     Result.theory_data.tau = tau_data*1E9;
-    Result.theory_data.fun = TheoryFun_assist(beta,tau_data, config, cal_para);
+    Result.theory_data.fun = TheoryFun_assist(beta,tau_data, config);
 end

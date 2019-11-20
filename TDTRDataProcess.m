@@ -32,34 +32,36 @@ else
     end
     config_file = fullfile(path, filename);
 end
+config.fitting_mode = 0;
+config.TheoryCurve_mode = 0;
 run(config_file);
-length_para = size(config.fit_para,1);
-para_name = '';
-for index_para = 1:1:length_para
-    para_name = [para_name, config.LayerName{config.fit_para(index_para,1)}, '_'];
-    switch config.fit_para(index_para, 2)
-        case 1
-            para_name = [para_name, 'kz [W/mK]'];
-        case 2
-            para_name = [para_name, 'kr [W/mK]'];
-        case 3
-            para_name = [para_name, 'vhc [MW/m^3K]'];
-        case 4
-            para_name = [para_name, 'd [nm]'];
-        case 5
-            para_name = [para_name, 'G [W/m^2K]'];
-    end
-    para_name = [para_name, '   ']; 
-end
-
-format_f = '';
-for index = 1:1:length_para
-    format_f = [format_f '%f  '];
-end
-format_f = [format_f '\r\n'];
 
 % fitting the data to get wanted parameters
 if config.fitting_mode == 1
+    length_para = size(config.fit_para,1);
+    para_name = '';
+    for index_para = 1:1:length_para
+        para_name = [para_name, config.LayerName{config.fit_para(index_para,1)}, '_'];
+        switch config.fit_para(index_para, 2)
+            case 1
+                para_name = [para_name, 'kz [W/mK]'];
+            case 2
+                para_name = [para_name, 'kr [W/mK]'];
+            case 3
+                para_name = [para_name, 'vhc [MW/m^3K]'];
+            case 4
+                para_name = [para_name, 'd [nm]'];
+            case 5
+                para_name = [para_name, 'G [W/m^2K]'];
+        end
+        para_name = [para_name, '   ']; 
+    end
+
+    format_f = '';
+    for index = 1:1:length_para
+        format_f = [format_f '%f  '];
+    end
+    format_f = [format_f '\r\n'];
     % all data files in the selected folder will be processed
     if config.folder_mode == 1
         % the folder or file path of the data
@@ -281,3 +283,33 @@ if config.fitting_mode == 1
     end   
 end
 %
+% Plot the theory curve
+if config.TheoryCurve_mode == 1
+    tau_data = logspace(log10(config.tau(1)),log10(config.tau(2)),200);
+    [func] = TheoryData(config.kz,config.kr,config.G,config.d,config.vhc,config.w,tau_data, config);
+    fig = figure('Position', fPosition);
+    semilogx(tau_data,func,'ko','MarkerSize',8);
+    title('Theory curve');
+    OutputPath = uigetdir('.','Pick a folder to storage the results');
+    if isequal(OutputPath,0)
+        disp('User pressed cancel')
+        return
+    end
+    IsNotExist = 0;
+    index = 1;
+    while IsNotExist == 0
+        OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
+        OutputFolder = fullfile(OutputPath, OutputFolder);
+        if exist(OutputFolder,'dir') == 0
+            IsNotExist = 1;
+        else
+            index = index + 1;
+        end
+    end
+    mkdir(OutputFolder);
+    copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
+    % save the theory data to output file
+    theory_data_file = fopen(fullfile(OutputFolder, 'theory_data.txt'),'w+');
+    fprintf(theory_data_file, '%f\t%f\r\n', [tau_data(:)'*1E9; func(:)']);
+    fclose(theory_data_file);
+end

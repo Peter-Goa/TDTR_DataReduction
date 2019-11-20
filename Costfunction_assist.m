@@ -1,4 +1,4 @@
-function [cost] = Costfunction_assist(beta, tau_data, fun_data, config, cal_para)
+function [cost] = Costfunction_assist(beta, tau_data, fun_data, config)
 
     fit_para = config.fit_para;
     value_0 = fit_para(:,3);
@@ -29,5 +29,5 @@ function [cost] = Costfunction_assist(beta, tau_data, fun_data, config, cal_para
             kr(index) = kz(index);
         end
     end
-    [cost] = Costfunction(kz,kr,G,d,vhc,config.w,tau_data,fun_data, config, cal_para);
+    [cost] = Costfunction(kz,kr,G,d,vhc,config.w,tau_data,fun_data, config);
 end

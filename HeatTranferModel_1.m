@@ -16,7 +16,7 @@ radial_mode = config.radial_mode;  % Mark. 0, one dimensional heat transfer; 1, 
 
 alpha = kz./vhc;            % thermal diffusivity.
 klimit = 10/sqrt(w*w');     % upper limit of k
-dk = 10000;                 % delta k of hankel transform
+dk = 1E5;                 % delta k of hankel transform
 k = (0:dk:klimit)';         % variabel of hankel transform
 k2 = k.*k;     
 omegasize = length(omega);

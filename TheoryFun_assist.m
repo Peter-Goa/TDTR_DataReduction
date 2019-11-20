@@ -1,4 +1,4 @@
-function [func] = TheoryFun_assist(beta, tau_data, config, cal_para)
+function [func] = TheoryFun_assist(beta, tau_data, config)
     value_0 = config.fit_para(:, 3)';
     NVars = size(config.fit_para,1);
     kz = config.kz;
@@ -26,5 +26,5 @@ function [func] = TheoryFun_assist(beta, tau_data, config, cal_para)
             kr(index) = kz(index);
         end
     end
-    func = TheoryData(kz,kr,G,d,vhc,config.w,tau_data, config, cal_para);
+    func = TheoryData(kz,kr,G,d,vhc,config.w,tau_data, config);
 end

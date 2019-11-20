@@ -1,4 +1,4 @@
-function [cost] = Costfunction(kz,kr,G,d,vhc,w,tau_data,fun_data, config, cal_para)
+function [cost] = Costfunction(kz,kr,G,d,vhc,w,tau_data,fun_data, config)
 % Cost function using least squares method in the thesis of Aaron Jerome Schmidt (equation 3.27).
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
@@ -9,7 +9,7 @@ function [cost] = Costfunction(kz,kr,G,d,vhc,w,tau_data,fun_data, config, cal_pa
 % Date: Nov. 11, 2019
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 
-fun = TheoryData(kz,kr,G,d,vhc,w,tau_data, config, cal_para);
+fun = TheoryData(kz,kr,G,d,vhc,w,tau_data, config);
 
 %%% Sum of squares of difference between theory and data
 res = (fun - fun_data).^2;
