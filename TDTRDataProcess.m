@@ -48,11 +48,11 @@ if config.fitting_mode == 1
             case 2
                 para_name = [para_name, 'kr [W/mK]'];
             case 3
-                para_name = [para_name, 'vhc [MW/m^3K]'];
+                para_name = [para_name, 'vhc [MJ/m^3K]'];
             case 4
                 para_name = [para_name, 'd [nm]'];
             case 5
-                para_name = [para_name, 'G [W/m^2K]'];
+                para_name = [para_name, 'G [MW/m^2K]'];
         end
         para_name = [para_name, '   ']; 
     end
