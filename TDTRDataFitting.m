@@ -16,7 +16,8 @@ function [Result] = TDTRDataFitting(raw_data)
     X_raw = raw_data(:,2);
     Y_raw = raw_data(:,3);
     % make the time whose X value is maximum is zero
-    [~, tau_zero_index] = max(X_raw);
+    % It's possible the X is nagetie, so we add abs to make sure the programe run correctly 
+    [~, tau_zero_index] = max(abs(X_raw));
     tau_zero = tau_raw(tau_zero_index);
     tau_raw = tau_raw - tau_zero;
     % shift phase to make Y value have minimum skip at time 0

@@ -15,6 +15,16 @@ function [] = TDTRDataProcess(varargin)
 close all
 withInput = nargin;
 
+% display some information about the code
+disp('Thanks for using this code to process your data!');
+disp('This code has several modes:')
+diso('1. Fitting');
+disp('2. Theory Curve');
+diso('3. Sensitivity');
+disp('4. Two-Frequency Fitting');
+disp('5. Uncertainty');
+disp('Note: If some errors existing, the file made by this code can not be deleted, you can run <fclose all> to solve this problem.');
+
 global config
 set(0,'defaultAxesFontSize',30)
 set(0,'defaultTextFontSize',30)
@@ -25,16 +35,26 @@ fPosition = [1 1 1400 1200];
 if withInput >= 1
     config_file = varargin{1};
 else
-    [filename, path] = uigetfile('*.m','Pick a configuration file');
+    [filename, path] = uigetfile('*.tdtrcfg','Pick a configuration file');
     if isequal(filename,0) || isequal(path,0)
         disp('User pressed cancel')
         return
     end
     config_file = fullfile(path, filename);
+    % a file with a suffix of .tdtrcfg can't be run directly, so we need to
+    % change its suffix to .m
+    if exist('.\temp','dir') == 0
+        mkdir('.\temp');
+    end
+    config_file_m = fullfile(path, [filename(1:end-7), 'm']);
+    copyfile(config_file, config_file_m);
 end
 config.fitting_mode = 0;
 config.TheoryCurve_mode = 0;
-run(config_file);
+config.Sensitivity = 0;
+config.TwoFrequencyFitting = 0;
+config.Uncertainty = 0;
+run(config_file_m);
 
 % fitting the data to get wanted parameters
 if config.fitting_mode == 1
