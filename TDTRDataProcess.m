@@ -18,9 +18,9 @@ withInput = nargin;
 % display some information about the code
 disp('Thanks for using this code to process your data!');
 disp('This code has several modes:')
-diso('1. Fitting');
+disp('1. Fitting');
 disp('2. Theory Curve');
-diso('3. Sensitivity');
+disp('3. Sensitivity');
 disp('4. Two-Frequency Fitting');
 disp('5. Uncertainty');
 disp('Note: If some errors existing, the file made by this code can not be deleted, you can run <fclose all> to solve this problem.');
@@ -43,10 +43,11 @@ else
     config_file = fullfile(path, filename);
     % a file with a suffix of .tdtrcfg can't be run directly, so we need to
     % change its suffix to .m
-    if exist('.\temp','dir') == 0
-        mkdir('.\temp');
+    temp_path = fullfile(path, 'temp');
+    if exist(temp_path,'dir') == 0
+        mkdir(temp_path);
     end
-    config_file_m = fullfile(path, [filename(1:end-7), 'm']);
+    config_file_m = fullfile(temp_path, [filename(1:end-7), 'm']);
     copyfile(config_file, config_file_m);
 end
 config.fitting_mode = 0;
@@ -333,3 +334,7 @@ if config.TheoryCurve_mode == 1
     fprintf(theory_data_file, '%f\t%f\r\n', [tau_data(:)'*1E9; func(:)']);
     fclose(theory_data_file);
 end
+
+% close file and delete the temp folder
+fclose all;
+rmdir(temp_path, 's');

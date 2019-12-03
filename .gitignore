@@ -1,3 +1,5 @@
 *.asv
 # the code will build a folder naned temp to storage some file temporarily
 temp/
+# 
+Configration/*.*
