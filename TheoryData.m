@@ -1,5 +1,4 @@
 function [func] = TheoryData(kz,kr,G,d,vhc,w,tau_data, config)
-    global cal_para;
     % modulation frequency [Hz]
     cal_para.omega_0 = 2*pi*config.f_mod;
     % laser reputation frequency

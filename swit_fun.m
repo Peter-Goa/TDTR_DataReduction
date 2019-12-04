@@ -1,6 +1,6 @@
-function[origin_fun] = swit_fun(X,Y,time,config)
+function[origin_fun] = swit_fun(X,Y,time,mode)
 
-    switch config.mode
+    switch mode
         case 'r'
             origin_fun = -X./Y;
         case 'p'

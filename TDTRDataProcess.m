@@ -60,29 +60,7 @@ run(config_file_m);
 % fitting the data to get wanted parameters
 if config.fitting_mode == 1
     length_para = size(config.fit_para,1);
-    para_name = '';
-    for index_para = 1:1:length_para
-        para_name = [para_name, config.LayerName{config.fit_para(index_para,1)}, '_'];
-        switch config.fit_para(index_para, 2)
-            case 1
-                para_name = [para_name, 'kz [W/mK]'];
-            case 2
-                para_name = [para_name, 'kr [W/mK]'];
-            case 3
-                para_name = [para_name, 'vhc [MJ/m^3K]'];
-            case 4
-                para_name = [para_name, 'd [nm]'];
-            case 5
-                para_name = [para_name, 'G [MW/m^2K]'];
-        end
-        para_name = [para_name, '   ']; 
-    end
-
-    format_f = '';
-    for index = 1:1:length_para
-        format_f = [format_f '%f  '];
-    end
-    format_f = [format_f '\r\n'];
+    [para_name, format_f] = getLabel(config.LayerName, config.fit_para);
     % all data files in the selected folder will be processed
     if config.folder_mode == 1
         % the folder or file path of the data
@@ -155,7 +133,7 @@ if config.fitting_mode == 1
             % read raw data
             raw_data = load(fullfile(SourcePath, filelist(index).name));
             % do the fitting and get result
-            Result = TDTRDataFitting(raw_data);
+            Result = TDTRDataFitting(raw_data, config);
             % save the raw data file to output folder
             raw_data_file = fullfile(raw_data_folder,filelist(index).name);
             copyfile(fullfile(SourcePath, filelist(index).name), raw_data_file);
@@ -186,7 +164,7 @@ if config.fitting_mode == 1
                 case 'a'
                     ylabel('Amplitude')
             end
-            saveas(fig,fullfile(img_folder,filelist(index).name(1:end-4)),'png');
+            saveas(fig,fullfile(img_folder,[filelist(index).name(1:end-4),'.png']),'png');
             % diaplay the result of fitting
             disp(para_name);
             disp(Result.fittingValue);
@@ -260,7 +238,7 @@ if config.fitting_mode == 1
         % read raw data
         raw_data = load(SourcePath);
         % do the fitting and get result
-        Result = TDTRDataFitting(raw_data);
+        Result = TDTRDataFitting(raw_data, config);
         % save the raw data file to output folder
         raw_data_file = fullfile(OutputFolder,[filename(1:end-4), '_raw_data.txt']);
         copyfile(SourcePath, raw_data_file);
@@ -291,7 +269,7 @@ if config.fitting_mode == 1
             case 'a'
                 ylabel('Amplitude')
         end
-        saveas(fig,fullfile(OutputFolder,filename(1:end-4)),'png');
+        saveas(fig,fullfile(OutputFolder,[filename(1:end-4),'.png']),'png');
         % diaplay the result of fitting
         disp(para_name);
         disp(Result.fittingValue);
@@ -333,6 +311,176 @@ if config.TheoryCurve_mode == 1
     theory_data_file = fopen(fullfile(OutputFolder, 'theory_data.txt'),'w+');
     fprintf(theory_data_file, '%f\t%f\r\n', [tau_data(:)'*1E9; func(:)']);
     fclose(theory_data_file);
+end
+
+if config.TwoFrequencyFitting == 1
+    Ndata = length(config.Data);
+    length_para = zero(1, Ndata);
+    for index = 1:1:Ndata
+        [para_name{index}, format_f{index}] = getLabel(config.Data{index}.LayerName, config.Data{index}.fit_para);
+    end
+    SourcePath_set = cell(1,Ndata);
+    % all data files in the selected folder will be processed
+    if config.folder_mode == 1
+        if (withInput > 1)
+            if (withInput < (Ndata+2))
+                disp('The number of input parameters is not enough');
+                return
+            else
+                for index = 1:1:Ndata
+                    SourcePath_set{index} = varargin{index+1};
+                end
+                OutputPath = varargin{index+2};
+            end
+        else
+            for index = 1:1:Ndata
+                SourcePath_set{index} = uigetdir('.',['Pick a folder where there are data files for ', num2str(index),'th data.']);
+                if isequal(SourcePath_set{index},0)
+                    disp('User pressed cancel')
+                    return
+                end
+            end
+            OutputPath = uigetdir('.','Pick a folder to storage the results');
+            if isequal(OutputPath,0)
+                disp('User pressed cancel')
+                return
+            end
+        end
+        IsNotExist = 0;
+        index = 1;
+        while IsNotExist == 0
+            OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
+            OutputFolder = fullfile(OutputPath, OutputFolder);
+            if exist(OutputFolder,'dir') == 0
+                IsNotExist = 1;
+            else
+                index = index + 1;
+            end
+        end
+        filelist_set = cell(1,Ndata);
+        length_filelist_set = zeros(1, Ndata);
+        for index = 1:1:Ndata
+            filelist_set{index}=dir(fullfile(SourcePath_set{index}, '*.txt'));
+            length_filelist_set(index)=length(filelist_set{index});
+            if length_filelist_set(index) < 1
+                disp('There is not data file in selected folder.');
+                return
+            end
+        end
+        length_filelist = min(length_filelist_set);
+        Result_set = cell(1,Ndata);
+        for index = 1:1:Ndata
+            Result_set{index} = zeros(length_filelist,length_para(index));
+        end
+        % make output folder
+        % make the root folder for output
+        mkdir(OutputFolder);
+        OutputFolder_set = cell(1,Ndata);
+        img_folder_set = cell(1,Ndata);
+        raw_data_folder_set = cell(1,Ndata);
+        dealed_data_folder_set = cell(1,Ndata);
+        theory_data_folder_set = cell(1,Ndata);
+        result_file_set = cell(1,Ndata);
+        for index = 1:1:Ndata
+            OutputFolder_set{index} = fullfile(OutputFolder, ['Data_1', num2str(index)]);
+            % make the image folder
+            img_folder_set{index} = fullfile(OutputFolder_set{index},'img');
+            mkdir(img_folder_set{index});
+            % make the raw data folder
+            % there are three columns in each file, which are time(ns), x, y
+            raw_data_folder_set{index} = fullfile(OutputFolder_set{index},'raw_data');
+            mkdir(raw_data_folder_set{index});
+            % make the dealed raw data folder
+            % there are two columns on each file, which are time(ns), fun
+            dealed_data_folder_set{index} = fullfile(OutputFolder_set{index},'dealed_data');
+            mkdir(dealed_data_folder_set{index});
+            % the theory data folder
+            % there are two columns on each file, which are time(ns), fun
+            theory_data_folder_set{index} = fullfile(OutputFolder_set{index},'theory_data');
+            mkdir(theory_data_folder_set{index});
+            % make result_log file in output folder to save fitting results
+            result_file_set{index} = fopen(fullfile(OutputFolder_set{index},'result_log.txt'),'a+');
+        end   
+        % copy the configuration file to output folder
+        copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
+        disp(['There are ', num2str(length_filelist), ' data files will be processed.']);
+        for index = 1:1:Ndata
+            fprintf(result_file_set{index},'%s\r\n',['There are ', num2str(length_filelist), ' data files will be processed.']);
+        end
+        for index = 1:1:length_filelist
+            disp(['File ', num2str(index), ' : ']);
+            raw_data_set = cell(1, Ndata);
+            for index_1 = 1:1:Ndata
+                fprintf(result_file_set{index_1},'%5s %3s %3s %s\r\n','File', num2str(index_1), ':', filelist_set{index_1}(index).name);
+                % read raw data
+                raw_data_set{index_1} = load(fullfile(SourcePath_set{index_1}, filelist_set{index_1}(index).name));
+            end
+            % do the fitting and get result
+            Result = TDTRDataTwoFreFitting(raw_data_set, config);
+            for index_1 = 1:1:Ndata
+                % save the raw data file to output folder
+                raw_data_file = fullfile(raw_data_folder_set{index_1},filelist_set{index_1}(index).name);
+                copyfile(fullfile(SourcePath_set{index_1}, filelist_set{index_1}(index).name), raw_data_file);
+                % save the dealed data file to output folder
+                dealed_data_file = fopen(fullfile(dealed_data_folder_set{index_1}, filelist_set{index_1}(index).name),'w+');
+                fprintf(dealed_data_file, '%f\t%f\r\n', [Result{index_1}.dealed_data.tau(:)'; Result{index_1}.dealed_data.fun(:)']);
+                fclose(dealed_data_file);
+                % save the theory data to output file
+                theory_data_file = fopen(fullfile(theory_data_folder_set{index_1}, filelist_set{index}(index).name),'w+');
+                fprintf(theory_data_file, '%f\t%f\r\n', [Result{index_1}.theory_data.tau(:)'; Result{index_1}.theory_data.fun(:)']);
+                fclose(theory_data_file);
+                % save the figure of dealed raw data and theory data to output file
+                fig = figure('Position', fPosition);
+                semilogx(Result{index_1}.dealed_data.tau,Result{index_1}.dealed_data.fun,'ko','MarkerSize',8);
+                title(['Fitting: ', num2str(index)]);
+                hold on
+                semilogx(Result{index_1}.theory_data.tau,Result{index_1}.theory_data.fun,'r-','LineWidth',4);
+                if config.Data{index_1}.mode ~= 'p'
+                    ylim([0,max(Result{index_1}.dealed_data.fun)+0.5]) 
+                end
+                legend('Data','Best fit')
+                xlabel('Delay time [s]')
+                switch config.Data{index_1}.mode
+                    case 'r'
+                        ylabel('Ratio')
+                    case 'p'
+                        ylabel('Phase')
+                    case 'a'
+                        ylabel('Amplitude')
+                end
+                saveas(fig,fullfile(img_folder_set{index_1},[filelist_set{index_1}(index).name(1:end-4),'.png']),'png');
+                % diaplay the result of fitting
+                disp(para_name{index_1});
+                disp(Result{index_1}.fittingValue);
+                disp(['The standard deviation is ', num2str(Result{index_1}.StdDev)]);
+                % save the fitting result to result_log file
+                fprintf(result_file_set{index_1},'%s\r\n',para_name{index_1});
+                fprintf(result_file_set{index_1},format_f{index_1},Result{index_1}.fittingValue');
+                fprintf(result_file_set{index_1},'%s\r\n',['The standard deviation is ', num2str(Result.StdDev)]);
+                Result_set{index_1}(index,:) = Result{index_1}.fittingValue;
+            end
+        end
+        disp('Summary of the results');
+        for index = 1:1:Ndata
+            disp(['Data',num2str(index),':']);
+            disp(para_name{index});
+            disp(Result_set{index});
+            disp('The average value');
+            disp(mean(Result_set{index},1));
+            disp('The standard deviation');
+            disp(std(Result_set{index},0,1));
+            fprintf(result_file_set{index},'\r\n%s\r\n','Summary of the results');
+            fprintf(result_file_set{index},'%s\r\n',para_name{index});
+            fprintf(result_file_set{index},format_f{index},Result_set{index}');
+            fprintf(result_file_set{index},'%s\r\n','The average value');
+            fprintf(result_file_set{index},format_f{index},mean(Result_set{index},1));
+            fprintf(result_file_set{index},'%s\r\n','The standard deviation');
+            fprintf(result_file_set{index},format_f{index},std(Result_set{index},0,1));
+            fclose(result_file_set{index});
+        end
+    else
+        
+    end
 end
 
 % close file and delete the temp folder
