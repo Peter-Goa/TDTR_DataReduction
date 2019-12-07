@@ -14,5 +14,5 @@ function [func] = TheoryData(kz,kr,G,d,vhc,w,tau_data, config)
     X = real(Z);
     Y = imag(Z);
 
-    func = swit_fun(X,Y,tau_data, config);
+    func = swit_fun(X,Y,tau_data, config.mode);
 end

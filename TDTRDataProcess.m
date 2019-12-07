@@ -34,6 +34,8 @@ fPosition = [1 1 1400 1200];
 % the configuration file
 if withInput >= 1
     config_file = varargin{1};
+    [path, filename, ext] = fileparts(config_file);
+    filename = [filename, ext];
 else
     [filename, path] = uigetfile('*.tdtrcfg','Pick a configuration file');
     if isequal(filename,0) || isequal(path,0)
@@ -41,15 +43,15 @@ else
         return
     end
     config_file = fullfile(path, filename);
-    % a file with a suffix of .tdtrcfg can't be run directly, so we need to
-    % change its suffix to .m
-    temp_path = fullfile(path, 'temp');
-    if exist(temp_path,'dir') == 0
-        mkdir(temp_path);
-    end
-    config_file_m = fullfile(temp_path, [filename(1:end-7), 'm']);
-    copyfile(config_file, config_file_m);
 end
+% a file with a suffix of .tdtrcfg can't be run directly, so we need to
+% change its suffix to .m
+temp_path = fullfile(path, 'temp');
+if exist(temp_path,'dir') == 0
+    mkdir(temp_path);
+end
+config_file_m = fullfile(temp_path, [filename(1:end-7), 'm']);
+    copyfile(config_file, config_file_m);
 config.fitting_mode = 0;
 config.TheoryCurve_mode = 0;
 config.Sensitivity = 0;
@@ -315,9 +317,10 @@ end
 
 if config.TwoFrequencyFitting == 1
     Ndata = length(config.Data);
-    length_para = zero(1, Ndata);
+    length_para = zeros(1, Ndata);
     for index = 1:1:Ndata
         [para_name{index}, format_f{index}] = getLabel(config.Data{index}.LayerName, config.Data{index}.fit_para);
+        length_para(index) = size(config.Data{index}.fit_para,1);
     end
     SourcePath_set = cell(1,Ndata);
     % all data files in the selected folder will be processed
@@ -426,7 +429,7 @@ if config.TwoFrequencyFitting == 1
                 fprintf(dealed_data_file, '%f\t%f\r\n', [Result{index_1}.dealed_data.tau(:)'; Result{index_1}.dealed_data.fun(:)']);
                 fclose(dealed_data_file);
                 % save the theory data to output file
-                theory_data_file = fopen(fullfile(theory_data_folder_set{index_1}, filelist_set{index}(index).name),'w+');
+                theory_data_file = fopen(fullfile(theory_data_folder_set{index_1}, filelist_set{index_1}(index).name),'w+');
                 fprintf(theory_data_file, '%f\t%f\r\n', [Result{index_1}.theory_data.tau(:)'; Result{index_1}.theory_data.fun(:)']);
                 fclose(theory_data_file);
                 % save the figure of dealed raw data and theory data to output file
@@ -456,7 +459,7 @@ if config.TwoFrequencyFitting == 1
                 % save the fitting result to result_log file
                 fprintf(result_file_set{index_1},'%s\r\n',para_name{index_1});
                 fprintf(result_file_set{index_1},format_f{index_1},Result{index_1}.fittingValue');
-                fprintf(result_file_set{index_1},'%s\r\n',['The standard deviation is ', num2str(Result.StdDev)]);
+                fprintf(result_file_set{index_1},'%s\r\n',['The standard deviation is ', num2str(Result{index_1}.StdDev)]);
                 Result_set{index_1}(index,:) = Result{index_1}.fittingValue;
             end
         end
