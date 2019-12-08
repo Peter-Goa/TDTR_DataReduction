@@ -14,13 +14,13 @@ if exist([filepath,'\img_A'],'dir')==0
     mkdir(filepath,'img_A');
 else
     disp('Dirction img_A exists, so can not create this direction again.');
-    return
+%   return
 end
 if exist([filepath,'\img_R'],'dir')==0
     mkdir(filepath,'img_R');
 else
     disp('Dirction img_R exists, so can not create this direction again.');
-    return
+%   return
 end
 
 for index = 1:length_namelist
