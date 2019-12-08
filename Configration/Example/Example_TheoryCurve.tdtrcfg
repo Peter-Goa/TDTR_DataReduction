@@ -39,5 +39,16 @@ config.tau = [0.4, 8]*1E-9;
 % the data type. 'r' - ratio of x and y (x/y); 'a' - normalized amplitude (sqrt(x^2+y^2)); 'p' - phase (arctan(y/x))
 config.mode = 'r';
 
+% 0 - don't draw a bias line;
+% 1 - draw a bias line;
+config.Bias = 1;
+
+% Bias parameter
+% 3 columns are Layer, Type and bias(%).
+% Type can be one of the list{1 - 'kz', 2 - 'kr', 3 - 'vhc', 4 - 'd', 5 - 'G'}.
+% If the material is isotropic, 'kz' rather than 'kr' should be used to get the thermal conductivity.
+% If bias is 10, 90% and 110% of Original value will be used to draw bias lines
+config.Bias_para =[2, 1, 10];
+
 % the mode to draw the theory curve
 config.TheoryCurve_mode = 1;

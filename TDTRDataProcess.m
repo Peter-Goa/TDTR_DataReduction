@@ -291,6 +291,54 @@ if config.TheoryCurve_mode == 1
     fig = figure('Position', fPosition);
     semilogx(tau_data,func,'ko','MarkerSize',8);
     title('Theory curve');
+    if config.Bias == 1
+        hold on;
+        switch config.Bias_para(2)
+            case 1
+                kz_temp_plus = config.kz;
+                kz_temp_plus(config.Bias_para(1)) = kz_temp_plus(config.Bias_para(1))*(1+config.Bias_para(3)/100);
+                [func_plus] = TheoryData(kz_temp_plus,config.kr,config.G,config.d,config.vhc,config.w,tau_data, config);
+                kz_temp_minus = config.kz;
+                kz_temp_minus(config.Bias_para(1)) = kz_temp_minus(config.Bias_para(1))*(1-config.Bias_para(3)/100);
+                [func_minus] = TheoryData(kz_temp_minus,config.kr,config.G,config.d,config.vhc,config.w,tau_data, config);
+                Label = {'origin',[num2str(100+config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th kz'], [num2str(100-config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th kz']};
+            case 2
+                kr_temp_plus = config.kr;
+                kr_temp_plus(config.Bias_para(1)) = kr_temp_plus(config.Bias_para(1))*(1+config.Bias_para(3)/100);
+                [func_plus] = TheoryData(config.kz,kr_temp_plus,config.G,config.d,config.vhc,config.w,tau_data, config);
+                kr_temp_minus = config.kr;
+                kr_temp_minus(config.Bias_para(1)) = kr_temp_minus(config.Bias_para(1))*(1-config.Bias_para(3)/100);
+                [func_minus] = TheoryData(config.kz,kr_temp_minus,config.G,config.d,config.vhc,config.w,tau_data, config);
+                Label = {'origin',[num2str(100+config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th kr'], [num2str(100-config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th kr']};
+            case 3
+                vhc_temp_plus = config.vhc;
+                vhc_temp_plus(config.Bias_para(1)) = vhc_temp_plus(config.Bias_para(1))*(1+config.Bias_para(3)/100);
+                [func_plus] = TheoryData(config.kz,config.kr,config.G,config.d,vhc_temp_plus,config.w,tau_data, config);
+                vhc_temp_minus = config.vhc;
+                vhc_temp_minus(config.Bias_para(1)) = vhc_temp_minus(config.Bias_para(1))*(1-config.Bias_para(3)/100);
+                [func_minus] = TheoryData(config.kz,config.kr,config.G,config.d,vhc_temp_minus,config.w,tau_data, config);
+                Label = {'origin',[num2str(100+config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th vhc'], [num2str(100-config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th vhc']};
+            case 4
+                d_temp_plus = config.d;
+                d_temp_plus(config.Bias_para(1)) = d_temp_plus(config.Bias_para(1))*(1+config.Bias_para(3)/100);
+                [func_plus] = TheoryData(config.kz,config.kr,config.G,d_temp_plus,config.vhc,config.w,tau_data, config);
+                d_temp_minus = config.d;
+                d_temp_minus(config.Bias_para(1)) = d_temp_minus(config.Bias_para(1))*(1-config.Bias_para(3)/100);
+                [func_minus] = TheoryData(config.kz,config.kr,config.G,d_temp_minus,config.vhc,config.w,tau_data, config);
+                Label = {'origin',[num2str(100+config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th d'], [num2str(100-config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th d']};                
+            case 5
+                G_temp_plus = config.G;
+                G_temp_plus(config.Bias_para(1)) = G_temp_plus(config.Bias_para(1))*(1+config.Bias_para(3)/100);
+                [func_plus] = TheoryData(config.kz,config.kr,G_temp_plus,config.d,config.vhc,config.w,tau_data, config);
+                G_temp_minus = config.G;
+                G_temp_minus(config.Bias_para(1)) = G_temp_minus(config.Bias_para(1))*(1-config.Bias_para(3)/100);
+                [func_minus] = TheoryData(config.kz,config.kr,G_temp_minus,config.d,config.vhc,config.w,tau_data, config);
+                Label = {'origin',[num2str(100+config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th G'], [num2str(100-config.Bias_para(3)),'% ', num2str(config.Bias_para(1)),'th G']};       
+        end
+        semilogx(tau_data,func_plus,'r-.','LineWidth',2);
+        semilogx(tau_data,func_minus,'b-.','LineWidth',2);
+        legend(Label);
+    end
     OutputPath = uigetdir('.','Pick a folder to storage the results');
     if isequal(OutputPath,0)
         disp('User pressed cancel')
