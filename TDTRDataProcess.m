@@ -59,7 +59,7 @@ config.TwoFrequencyFitting = 0;
 config.Uncertainty = 0;
 run(config_file_m);
 
-% fitting the data to get wanted parameters
+%% fitting the data to get wanted parameters
 if config.fitting_mode == 1
     length_para = size(config.fit_para,1);
     [para_name, format_f] = getLabel(config.LayerName, config.fit_para);
@@ -283,12 +283,12 @@ if config.fitting_mode == 1
         fclose(result_file);
     end   
 end
-%
-% Plot the theory curve
+
+%% Plot the theory curve
 if config.TheoryCurve_mode == 1
     tau_data = logspace(log10(config.tau(1)),log10(config.tau(2)),200);
     [func] = TheoryData(config.kz,config.kr,config.G,config.d,config.vhc,config.w,tau_data, config);
-    fig = figure('Position', fPosition);
+    figure('Position', fPosition);
     semilogx(tau_data,func,'ko','MarkerSize',8);
     title('Theory curve');
     if config.Bias == 1
@@ -363,6 +363,7 @@ if config.TheoryCurve_mode == 1
     fclose(theory_data_file);
 end
 
+%% Two frequency fitting model
 if config.TwoFrequencyFitting == 1
     Ndata = length(config.Data);
     length_para = zeros(1, Ndata);
@@ -677,6 +678,71 @@ if config.TwoFrequencyFitting == 1
     end
 end
 
-% close file and delete the temp folder
+%% Sensitivity calculation model
+if config.Sensitivity == 1
+    NumParame = size(config.sensitivity_para, 1);
+    Numtime = 200;
+    time = linspace(config.tau(1), config.tau(2), Numtime);
+    time_ns = time*1e9;
+    result = zeros(NumParame, Numtime);
+    OriginalFun = TheoryData(config.kz,config.kr,config.G,config.d,config.vhc,config.w, time, config);
+    para_name = getLabel_s(config.LayerName, config.sensitivity_para);
+    Colors = getColors(NumParame);
+    ratio = 1.01;
+    for index = 1:1:NumParame
+        kz = config.kz;
+        kr = config.kr;
+        G = config.G;
+        d = config.d;
+        vhc = config.vhc;
+        w = config.w;
+        if config.sensitivity_para(index,1) == 0
+            switch config.sensitivity_para(index, 2)
+                case 1
+                    w(1) = w(1)*ratio;
+                case 2
+                    w(2) = w(2)*ratio;
+            end
+        else
+            switch config.sensitivity_para(index, 2)
+                case 1
+                    kz(config.sensitivity_para(index)) = kz(config.sensitivity_para(index))*ratio;
+                case 2
+                    kr(config.sensitivity_para(index)) = kr(config.sensitivity_para(index))*ratio;
+                case 3
+                    vhc(config.sensitivity_para(index)) = vhc(config.sensitivity_para(index))*ratio;
+                case 4
+                    d(config.sensitivity_para(index)) = d(config.sensitivity_para(index))*ratio;
+                case 5
+                    G(config.sensitivity_para(index)) = G(config.sensitivity_para(index))*ratio;
+            end
+        end
+        tFun = TheoryData(kz, kr, G, d, vhc, w, time, config);
+        if config.mode == 'p'
+            result(index, :) = (tFun-OriginalFun)./log(ratio);
+        else
+            result(index, :) = log(tFun./OriginalFun)./log(ratio);
+        end
+    end
+    numPic = length(config.num_line_pic);
+    linePic = zeros(numPic,2);
+    indexLine = 0;
+    for index = 1:1:numPic
+        linePic(index, 1) = indexLine + 1;
+        indexLine = indexLine + config.num_line_pic(index);
+        linePic(index, 2) = indexLine;
+    end
+    for index = 1:1:numPic
+        figure('Position', fPosition);
+        hold on
+        for indexLine = linePic(index, 1):linePic(index, 2)
+            plot(time_ns, result(indexLine, :), 'Color', Colors(indexLine,:),'LineWidth', 2);
+        end
+        legend(para_name(linePic(index, 1):linePic(index, 2)));
+        hold off
+    end
+end
+
+%% close file and delete the temp folder
 fclose all;
 rmdir(temp_path, 's');
