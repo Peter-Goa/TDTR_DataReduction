@@ -724,6 +724,25 @@ if config.Sensitivity == 1
             result(index, :) = log(tFun./OriginalFun)./log(ratio);
         end
     end
+    OutputPath = uigetdir('.','Pick a folder to storage the results');
+    if isequal(OutputPath,0)
+        disp('User pressed cancel')
+        return
+    end
+    IsNotExist = 0;
+    index = 1;
+    while IsNotExist == 0
+        OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
+        OutputFolder = fullfile(OutputPath, OutputFolder);
+        if exist(OutputFolder,'dir') == 0
+            IsNotExist = 1;
+        else
+            index = index + 1;
+        end
+    end
+    mkdir(OutputFolder);
+    copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
+    % save the sensitivity picture to the output file
     numPic = length(config.num_line_pic);
     linePic = zeros(numPic,2);
     indexLine = 0;
@@ -733,13 +752,14 @@ if config.Sensitivity == 1
         linePic(index, 2) = indexLine;
     end
     for index = 1:1:numPic
-        figure('Position', fPosition);
+        fig = figure('Position', fPosition);
         hold on
         for indexLine = linePic(index, 1):linePic(index, 2)
             plot(time_ns, result(indexLine, :), 'Color', Colors(indexLine,:),'LineWidth', 2);
         end
         legend(para_name(linePic(index, 1):linePic(index, 2)));
         hold off
+        saveas(fig,fullfile(OutputFolder,['Pic_', num2str(index),'.png']),'png');
     end
 end
 
