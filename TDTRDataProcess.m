@@ -57,6 +57,7 @@ config.TheoryCurve_mode = 0;
 config.Sensitivity = 0;
 config.TwoFrequencyFitting = 0;
 config.Uncertainty = 0;
+config.ZeroPointMode = 0;
 run(config_file_m);
 
 %% fitting the data to get wanted parameters

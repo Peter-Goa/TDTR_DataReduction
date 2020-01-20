@@ -34,6 +34,8 @@ config.Data{1}.f_mod = 11.05E6;
 config.Data{1}.tau = [0.4, 8]*1E-9;
 % the data type. 'r' - ratio of x and y (x/y); 'a' - normalized amplitude (sqrt(x^2+y^2)); 'p' - phase (arctan(y/x))
 config.Data{1}.mode = 'r';
+% how to find the zero point of time. Here are several method. 0 - the point with the maximum value of X; 1 - the point with maximun value of dx;
+config.Data{1}.ZeroPointMode = 0;
 % parameters which will be fitting. It is a Npara*5 matrix. 5 columns are 'Layer', 'Type', 'GaussValue', 'MinValue', 'MaxValue' seperately.
 % Npara is the number of fitting parameter. Type can be one of the list{1 - 'kz', 2 - 'kr', 3 - 'vhc', 4 - 'd', 5 - 'G'}.
 % If the material is isotropic, 'kz' rather than 'kr' should be used to get the thermal conductivity.

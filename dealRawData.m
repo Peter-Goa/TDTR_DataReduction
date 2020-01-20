@@ -1,4 +1,4 @@
-function [tau_data, fun_data] = dealRawData(raw_data, tau, mode)
+function [tau_data, fun_data] = dealRawData(raw_data, tau, mode, ZeroPointMode)
 % Do some processing on the raw data
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
@@ -13,9 +13,20 @@ function [tau_data, fun_data] = dealRawData(raw_data, tau, mode)
     tau_raw = raw_data(:,1)*1E-9;
     X_raw = raw_data(:,2);
     Y_raw = raw_data(:,3);
-    % make the time whose X value is maximum is zero
-    % It's possible the X is nagetie, so we add abs to make sure the programe run correctly 
-    [~, tau_zero_index] = max(abs(X_raw));
+    % some method to find the zero point of time
+    switch ZeroPointMode
+        case 1
+            % make the time whose dX value is maximum is zero
+            % It's possible the dX is nagetie, so we add abs to make sure the programe run correctly
+            d_X_raw = (X_raw(2 : end) - X_raw(1 : end-1))./(tau_raw(2 : end) - tau_raw(1 : end-1));
+            [~, tau_zero_index] = max(abs(d_X_raw));
+            tau_zero_index = tau_zero_index + 1;
+        otherwise
+            % make the time whose X value is maximum is zero
+            % It's possible the X is nagetie, so we add abs to make sure the programe run correctly
+            [~, tau_zero_index] = max(abs(X_raw));
+    end
+    
     tau_zero = tau_raw(tau_zero_index);
     tau_raw = tau_raw - tau_zero;
     % shift phase to make Y value have minimum skip at time 0

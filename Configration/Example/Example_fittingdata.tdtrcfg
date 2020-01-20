@@ -45,6 +45,9 @@ config.tau = [0.4, 8]*1E-9;
 % the data type. 'r' - ratio of x and y (x/y); 'a' - normalized amplitude (sqrt(x^2+y^2)); 'p' - phase (arctan(y/x))
 config.mode = 'r';
 
+% how to find the zero point of time. Here are several method. 0 - the point with the maximum value of X; 1 - the point with maximun value of dx;
+config.ZeroPointMode = 0;
+
 % 0 - just process a single file whose path is SourcePath; 1 - process all of the files in the SourcePath
 config.folder_mode = 1;
 

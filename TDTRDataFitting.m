@@ -9,7 +9,7 @@ function [Result] = TDTRDataFitting(raw_data, config)
 % Date: Nov. 14, 2019
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 
-    [tau_data, fun_data] = dealRawData(raw_data, config.tau, config.mode);
+    [tau_data, fun_data] = dealRawData(raw_data, config.tau, config.mode, config.ZeroPointMode);
     Result.dealed_data.tau = tau_data*1E9;
     Result.dealed_data.fun = fun_data;
     NVars = size(config.fit_para,1);
