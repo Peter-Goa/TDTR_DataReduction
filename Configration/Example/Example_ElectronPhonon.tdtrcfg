@@ -1,0 +1,56 @@
+global config
+
+%% parameters (R - real number, C - complex number)
+% linear coefficient to the electron heat capacity (Jm-3K-1)
+config.R_gamma = 62.9;
+% electron-phonon coupling factor (Wm-3K-1)
+config.R_G = 2.5E16;
+% heat capacity of lattice (Jm-3K)
+config.R_CL = 2.49E6;
+% absorpted incident laser fluence (Jm-2)
+config.R_F = 1;
+% pulse width (s)
+config.R_tp = 140E-15;
+% flim thickness (m)
+config.R_d = 18.2E-9;
+% enviroment temperature (K)
+config.R_T0 = 273.15+15;
+% delay in electron thermailization after pulse absorption (s)
+config.R_tth = 1E-12;
+% light speed
+config.R_c = 2.998E8;
+% photon angular frequency (s-1rad)
+config.R_omega = 2*pi*(config.R_c)/(800E-9);
+% refractive index of substrate
+config.C_ns = 1.554 + 1i*1.3E-7;
+% plasma angular frequency (s-1rad)
+config.R_omegap = 1.37E16;
+% constant coefficients of Drude model
+config.R_Aee = 1.2E7 %(K-2s-1)
+config.R_Bep = 1.23E11 %(K-1s-1)
+
+% the range of time during which the data will be used for calculation ([tau_min, tau_max])[s]
+config.tau = [-2, 6]*1E-12;
+
+% the data type. 'x' - in-phase signal (x); 'amp' - normalized amplitude (sqrt(x^2+y^2))
+config.mode = 'amp';
+
+% how to find the zero point of time. Here are several method. 0 - the point with the maximum value of X; 1 - the point with maximun value of dx;
+config.ZeroPointMode = 0;
+
+% 0 - just process a single file whose path is SourcePath; 1 - process all of the files in the SourcePath
+config.folder_mode = 1;
+
+% parameters which will be fitting. It is a Npara matrix*4. 4 lines are Type, GaussValue, MinValue, MaxValue.
+% Npara is the number of fitting parameter. Type can be one of the list{1 - 'G', 2 - 'F', 3 - 'tth', 4 - 'Aee', 5 - 'Bep'}.
+config.fit_para = [
+1, 2.5E16, 1E16, 5E16
+2, 5, 0.1, 20
+3, 1E-12, 0.2E-12, 5E-12
+];  
+
+% the maximum iteration of the fitting process
+config.iteration = 300;
+
+% do fitting or don't do fitting. 0 - don't do fitting; 1 - do fitting
+config.ElectronPhononMode = 1;
