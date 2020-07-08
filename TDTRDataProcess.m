@@ -100,7 +100,7 @@ if config.fitting_mode == 1
             end
         end
         % get the files in the SourcePath
-        filelist = dir([SourcePath '\*.txt']);
+        filelist = dir([SourcePath filesep() '*.txt']);
         length_filelist = length(filelist);
         if length_filelist < 1
             disp('There is not data file in selected folder.');

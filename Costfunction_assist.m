@@ -25,7 +25,7 @@ function [cost] = Costfunction_assist(beta, tau_data, fun_data, config)
     end
     NLayer = size(config.kz, 2);
     for index = 1:1:NLayer
-        if config.iso(index) == 0
+        if config.iso(index) == 1
             kr(index) = kz(index);
         end
     end
