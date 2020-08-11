@@ -1147,7 +1147,7 @@ if config.mapping_mode == 1
         fig = figure('Position', fPosition);
         contourf(para_data);
         colorbar
-        title(para_name_list{index});
+        title()
         saveas(fig,fullfile(mapping_folder,[para_name_list{index},'.png']),'png');
     end   
 end
