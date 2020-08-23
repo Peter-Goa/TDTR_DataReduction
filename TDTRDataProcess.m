@@ -293,7 +293,7 @@ end
 if config.TheoryCurve_mode == 1
     tau_data = logspace(log10(config.tau(1)),log10(config.tau(2)),200);
     [func] = TheoryData(config.kz,config.kr,config.G,config.d,config.vhc,config.w,tau_data, config);
-    figure('Position', fPosition);
+    fig = figure('Position', fPosition);
     semilogx(tau_data,func,'ko','MarkerSize',8);
     title('Theory curve');
     if config.Bias == 1
@@ -366,6 +366,8 @@ if config.TheoryCurve_mode == 1
     theory_data_file = fopen(fullfile(OutputFolder, 'theory_data.txt'),'w+');
     fprintf(theory_data_file, '%f\t%f\r\n', [tau_data(:)'*1E9; func(:)']);
     fclose(theory_data_file);
+    hold off
+    saveas(fig,fullfile(OutputFolder, 'TheoryCurve.png']),'png');
 end
 
 %% Two frequency fitting model
