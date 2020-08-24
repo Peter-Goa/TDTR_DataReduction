@@ -77,6 +77,8 @@ if config.fitting_mode == 1
             SourcePath = uigetdir('.','Pick a folder where there are data files');
             if isequal(SourcePath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -87,6 +89,8 @@ if config.fitting_mode == 1
             OutputPath = uigetdir('.','Pick a folder to storage the results');
             if isequal(OutputPath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -106,6 +110,8 @@ if config.fitting_mode == 1
         length_filelist = length(filelist);
         if length_filelist < 1
             disp('There is not data file in selected folder.');
+            fclose all;
+            rmdir(temp_path, 's');
             return
         end
         Results = zeros(length_filelist,length_para);
@@ -207,6 +213,8 @@ if config.fitting_mode == 1
             [filename, path] = uigetfile('*.txt','Pick a data file');
             if isequal(filename,0) || isequal(path,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
             SourcePath = fullfile(path, filename);
@@ -218,6 +226,8 @@ if config.fitting_mode == 1
             OutputPath = uigetdir('.','Pick a folder to storage the results');
             if isequal(OutputPath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -347,6 +357,8 @@ if config.TheoryCurve_mode == 1
     OutputPath = uigetdir('.','Pick a folder to storage the results');
     if isequal(OutputPath,0)
         disp('User pressed cancel')
+        fclose all;
+        rmdir(temp_path, 's');
         return
     end
     IsNotExist = 0;
@@ -384,6 +396,8 @@ if config.TwoFrequencyFitting == 1
         if (withInput > 1)
             if (withInput < (Ndata+2))
                 disp('The number of input parameters is not enough');
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             else
                 for index = 1:1:Ndata
@@ -396,12 +410,16 @@ if config.TwoFrequencyFitting == 1
                 SourcePath_set{index} = uigetdir('.',['Pick a folder where there are data files for ', num2str(index),'th data.']);
                 if isequal(SourcePath_set{index},0)
                     disp('User pressed cancel')
+                    fclose all;
+                    rmdir(temp_path, 's');
                     return
                 end
             end
             OutputPath = uigetdir('.','Pick a folder to storage the results');
             if isequal(OutputPath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -423,6 +441,8 @@ if config.TwoFrequencyFitting == 1
             length_filelist_set(index)=length(filelist_set{index});
             if length_filelist_set(index) < 1
                 disp('There is not data file in selected folder.');
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -542,6 +562,8 @@ if config.TwoFrequencyFitting == 1
         if (withInput > 1)
             if (withInput < (Ndata+2))
                 disp('The number of input parameters is not enough');
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             else
                 for index = 1:1:Ndata
@@ -554,12 +576,16 @@ if config.TwoFrequencyFitting == 1
                 [filelist_set{index},SourcePath_set{index}] = uigetfile('*.txt',['Pick a data file for ', num2str(index),'th data.']);
                 if isequal(SourcePath_set{index},0) || isequal(filelist_set{index},0)
                     disp('User pressed cancel')
+                    fclose all;
+                    rmdir(temp_path, 's');
                     return
                 end
             end
             OutputPath = uigetdir('.','Pick a folder to storage the results');
             if isequal(OutputPath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -734,6 +760,8 @@ if config.Sensitivity == 1
     OutputPath = uigetdir('.','Pick a folder to storage the results');
     if isequal(OutputPath,0)
         disp('User pressed cancel')
+        fclose all;
+        rmdir(temp_path, 's');
         return
     end
     IsNotExist = 0;
@@ -783,6 +811,8 @@ if config.ElectronPhononMode == 1
             SourcePath = uigetdir('.','Pick a folder where there are data files');
             if isequal(SourcePath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -792,6 +822,8 @@ if config.ElectronPhononMode == 1
             OutputPath = uigetdir('.','Pick a folder to storage the results');
             if isequal(OutputPath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -811,6 +843,8 @@ if config.ElectronPhononMode == 1
         length_filelist = length(filelist);
         if length_filelist < 1
             disp('There is not data file in selected folder.');
+            fclose all;
+            rmdir(temp_path, 's');
             return
         end
         Results = zeros(length_filelist,length_para);
@@ -910,6 +944,8 @@ if config.ElectronPhononMode == 1
             [filename, path] = uigetfile('*.txt','Pick a data file');
             if isequal(filename,0) || isequal(path,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
             SourcePath = fullfile(path, filename);
@@ -921,6 +957,8 @@ if config.ElectronPhononMode == 1
             OutputPath = uigetdir('.','Pick a folder to storage the results');
             if isequal(OutputPath,0)
                 disp('User pressed cancel')
+                fclose all;
+                rmdir(temp_path, 's');
                 return
             end
         end
@@ -1003,6 +1041,8 @@ if config.mapping_mode == 1
         SourcePath = uigetdir('.','Pick a folder where there are data files');
         if isequal(SourcePath,0)
             disp('User pressed cancel')
+            fclose all;
+            rmdir(temp_path, 's');
             return
         end
     end
@@ -1013,6 +1053,8 @@ if config.mapping_mode == 1
         OutputPath = uigetdir('.','Pick a folder to storage the results');
         if isequal(OutputPath,0)
             disp('User pressed cancel')
+            fclose all;
+            rmdir(temp_path, 's');
             return
         end
     end
@@ -1032,6 +1074,8 @@ if config.mapping_mode == 1
     length_filelist = length(filelist);
     if length_filelist < 1
         disp('There is not data file in selected folder.');
+        fclose all;
+        rmdir(temp_path, 's');
         return
     end
     % make output folder
@@ -1064,6 +1108,8 @@ if config.mapping_mode == 1
         TDTRFilePath = uigetfile('.txt','Pick a TDTR data file, which will be used to modify the Offset data');
         if isequal(TDTRFilePath,0)
             disp('User pressed cancel')
+            fclose all;
+            rmdir(temp_path, 's');
             return
         end
         raw_data = load(TDTRFilePath);

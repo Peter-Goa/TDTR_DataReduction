@@ -30,7 +30,8 @@ config.d = [500E3, 23.8, 434.1, 500E3]*1E-9;
 config.w = [15.5 10.9]/2*1E-6;
 
 % 0 - the laser applying directly on metal transducer on the top of sample
-% 1 - the applying form glass side
+% 1 - the laser applying on the metal transducer which is not on the top of the sample
+% 2 - two way heat transfer, but the measurement place is same with the heating place
 config.two_way = 1;
 
 % places of heat source and temperature measurement. It is a 2 x 2 matrix. The first line is for heat source and the second line is for temperature 
