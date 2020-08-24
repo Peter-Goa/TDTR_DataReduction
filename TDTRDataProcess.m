@@ -367,7 +367,7 @@ if config.TheoryCurve_mode == 1
     fprintf(theory_data_file, '%f\t%f\r\n', [tau_data(:)'*1E9; func(:)']);
     fclose(theory_data_file);
     hold off
-    saveas(fig,fullfile(OutputFolder, 'TheoryCurve.png']),'png');
+    saveas(fig,fullfile(OutputFolder, 'TheoryCurve.png'),'png');
 end
 
 %% Two frequency fitting model
