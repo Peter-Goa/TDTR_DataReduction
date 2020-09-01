@@ -354,12 +354,16 @@ if config.TheoryCurve_mode == 1
         semilogx(tau_data,func_minus,'b-.','LineWidth',2);
         legend(Label);
     end
-    OutputPath = uigetdir('.','Pick a folder to storage the results');
-    if isequal(OutputPath,0)
-        disp('User pressed cancel')
-        fclose all;
-        rmdir(temp_path, 's');
-        return
+    if withInput >= 2
+        OutputPath = varargin{2};
+    else
+        OutputPath = uigetdir('.','Pick a folder to storage the results');
+        if isequal(OutputPath,0)
+            disp('User pressed cancel')
+            fclose all;
+            rmdir(temp_path, 's');
+            return
+        end
     end
     IsNotExist = 0;
     index = 1;
@@ -720,8 +724,17 @@ if config.Sensitivity == 1
     result = zeros(NumParame, Numtime);
     OriginalFun = TheoryData(config.kz,config.kr,config.G,config.d,config.vhc,config.w, time, config);
     para_name = getLabel_s(config.LayerName, config.sensitivity_para);
+    para_name_s = 'Time[ns]';
+    form_s = '%f\t';
+    for index = 1:1:NumParame
+        para_name_s = [para_name_s,',',para_name{index}];
+        form_s = [form_s,'%f\t'];
+    end
+    form_s = [form_s,'\r\n'];
     Colors = getColors(NumParame);
     ratio = 1.01;
+    Sens_Data = zeros(Numtime,NumParame+1);
+    Sens_Data(:,1) = time_ns';
     for index = 1:1:NumParame
         kz = config.kz;
         kr = config.kr;
@@ -756,13 +769,18 @@ if config.Sensitivity == 1
         else
             result(index, :) = log(tFun./OriginalFun)./log(ratio);
         end
+        Sens_Data(:,index+1) = result(index, :)';
     end
-    OutputPath = uigetdir('.','Pick a folder to storage the results');
-    if isequal(OutputPath,0)
-        disp('User pressed cancel')
-        fclose all;
-        rmdir(temp_path, 's');
-        return
+    if withInput >= 2
+        OutputPath = varargin{2};
+    else
+        OutputPath = uigetdir('.','Pick a folder to storage the results');
+        if isequal(OutputPath,0)
+            disp('User pressed cancel')
+            fclose all;
+            rmdir(temp_path, 's');
+            return
+        end
     end
     IsNotExist = 0;
     index = 1;
@@ -796,6 +814,10 @@ if config.Sensitivity == 1
         hold off
         saveas(fig,fullfile(OutputFolder,['Pic_', num2str(index),'.png']),'png');
     end
+    Sens_file = fopen(fullfile(OutputFolder, 'Sensitivity_data.txt'),'w+');
+    fprintf(Sens_file, '%s\r\n', para_name_s);
+    fprintf(Sens_file, form_s, Sens_Data);
+    fclose(Sens_file);
 end
 
 %% Electron-Phonon Coupling factor
