@@ -553,7 +553,7 @@ if config.TwoFrequencyFitting == 1
             disp(mean(Result_set{index},1));
             disp('The standard deviation');
             disp(std(Result_set{index},0,1));
-            fprintf(result_file_set{indedata_allx},'\r\n%s\r\n','Summary of the results');
+            fprintf(result_file_set{index},'\r\n%s\r\n','Summary of the results');
             fprintf(result_file_set{index},'%s\r\n',para_name{index});
             fprintf(result_file_set{index},format_f{index},Result_set{index}');
             fprintf(result_file_set{index},'%s\r\n','The average value');
@@ -598,7 +598,7 @@ if config.TwoFrequencyFitting == 1
         index = 1;
         while IsNotExist == 0
             OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
-            OutputFolder = fullfile(Outpdata_allutPath, OutputFolder);
+            OutputFolder = fullfile(OutputPath, OutputFolder);
             if exist(OutputFolder,'dir') == 0
                 IsNotExist = 1;
             else
@@ -640,7 +640,7 @@ if config.TwoFrequencyFitting == 1
             result_file_set{index} = fopen(fullfile(OutputFolder_set{index},'result_log.txt'),'a+');
         end   
         % copy the configuration file to output folder
-        copyfile(config_file, fullfile(Odata_allutputFolder,'configuration.txt'));
+        copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
         disp(['There are ', num2str(length_filelist), ' data files will be processed.']);
         for index = 1:1:Ndata
             fprintf(result_file_set{index},'%s\r\n',['There are ', num2str(length_filelist), ' data files will be processed.']);
@@ -679,7 +679,7 @@ if config.TwoFrequencyFitting == 1
             switch config.Data{index_1}.mode
                 case 'r'
                     ylabel('Ratio')
-                case 'p'data_all
+                case 'p'
                     ylabel('Phase')
                 case 'a'
                     ylabel('Amplitude')
@@ -838,7 +838,7 @@ if config.ParameterScan == 1
         if isequal(OutputPath,0)
             disp('User pressed cancel')
             fclose all;
-            rmdir(temp_path, 's');data_all
+            rmdir(temp_path, 's');
             return
         end
     end
@@ -883,7 +883,7 @@ if config.ParameterScan == 1
             else
                 switch config.parameterScan_para(index_para,2)
                     case 1
-                        kz(config.paramedata_allterScan_para(index_para,1)) = XValue(indexXValue);
+                        kz(config.parameterScan_para(index_para,1)) = XValue(indexXValue);
                     case 2
                         kr(config.parameterScan_para(index_para,1)) = XValue(indexXValue);
                     case 3
@@ -976,7 +976,7 @@ if config.ElectronPhononMode == 1
         end
         IsNotExist = 0;
         index = 1;
-        while IsNotExist == 0data_all
+        while IsNotExist == 0
             OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
             OutputFolder = fullfile(OutputPath, OutputFolder);
             if exist(OutputFolder,'dir') == 0
@@ -1024,7 +1024,7 @@ if config.ElectronPhononMode == 1
             disp(['File ', num2str(index), ' : ', filelist(index).name]);
             fprintf(result_file,'%5s %3s %3s %s\r\n','File', num2str(index), ':', filelist(index).name);
             % read raw data
-            raw_data = load(fullfile(Soudata_allrcePath, filelist(index).name));
+            raw_data = load(fullfile(SourcePath, filelist(index).name));
             % do the fitting and get result
             Result = TDTR_EP_DataFitting(raw_data, config);
             % save the raw data file to output folder
