@@ -28,8 +28,8 @@ config.d = [23.8, 434.1, 500E3]*1E-9;
 % diameter of laser beam ([pump probe])[m]
 config.w = [15.5 10.9]/2*1E-6;
 
-% the interval between 2 points [m]
-config.interval = 20E-6;
+% the interval between 2 points (x,y) [mm]
+config.interval = [20,20]*1E-3;
 
 % 0 - the laser applying directly on metal transducer on the top of sample
 % 1 - the applying form glass side

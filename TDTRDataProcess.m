@@ -1337,10 +1337,12 @@ if config.mapping_mode == 1
     mkdir(mapping_folder);
     for index = 1:1:length_para
         para_data = Results_matrix(:,:,index);
+        length_x = size(para_data,2);
+        length_y = size(para_data,1);
         para_filepath = fullfile(mapping_folder,[para_name_list{index} '.txt']);
         save(para_filepath,'para_data','-ascii');
         fig = figure('Position', fPosition);
-        contourf(para_data);
+        contourf((1:1:length_x)*config.interval(1), (1:1:length_y)*config.interval(2), para_data);
         colorbar
         title(para_name_list{index});
         saveas(fig,fullfile(mapping_folder,[para_name_list{index},'.png']),'png');
