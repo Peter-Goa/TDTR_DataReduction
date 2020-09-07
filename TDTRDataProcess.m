@@ -62,6 +62,7 @@ config.Uncertainty = 0;
 config.ZeroPointMode = 0;
 config.ElectronPhononMode = 0;
 config.mapping_mode = 0;
+config.ParameterScan = 0;
 run(config_file_m);
 
 %% fitting the data to get wanted parameters
@@ -552,7 +553,7 @@ if config.TwoFrequencyFitting == 1
             disp(mean(Result_set{index},1));
             disp('The standard deviation');
             disp(std(Result_set{index},0,1));
-            fprintf(result_file_set{index},'\r\n%s\r\n','Summary of the results');
+            fprintf(result_file_set{indedata_allx},'\r\n%s\r\n','Summary of the results');
             fprintf(result_file_set{index},'%s\r\n',para_name{index});
             fprintf(result_file_set{index},format_f{index},Result_set{index}');
             fprintf(result_file_set{index},'%s\r\n','The average value');
@@ -597,7 +598,7 @@ if config.TwoFrequencyFitting == 1
         index = 1;
         while IsNotExist == 0
             OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
-            OutputFolder = fullfile(OutputPath, OutputFolder);
+            OutputFolder = fullfile(Outpdata_allutPath, OutputFolder);
             if exist(OutputFolder,'dir') == 0
                 IsNotExist = 1;
             else
@@ -639,7 +640,7 @@ if config.TwoFrequencyFitting == 1
             result_file_set{index} = fopen(fullfile(OutputFolder_set{index},'result_log.txt'),'a+');
         end   
         % copy the configuration file to output folder
-        copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
+        copyfile(config_file, fullfile(Odata_allutputFolder,'configuration.txt'));
         disp(['There are ', num2str(length_filelist), ' data files will be processed.']);
         for index = 1:1:Ndata
             fprintf(result_file_set{index},'%s\r\n',['There are ', num2str(length_filelist), ' data files will be processed.']);
@@ -678,7 +679,7 @@ if config.TwoFrequencyFitting == 1
             switch config.Data{index_1}.mode
                 case 'r'
                     ylabel('Ratio')
-                case 'p'
+                case 'p'data_all
                     ylabel('Phase')
                 case 'a'
                     ylabel('Amplitude')
@@ -752,15 +753,15 @@ if config.Sensitivity == 1
         else
             switch config.sensitivity_para(index, 2)
                 case 1
-                    kz(config.sensitivity_para(index)) = kz(config.sensitivity_para(index))*ratio;
+                    kz(config.sensitivity_para(index,1)) = kz(config.sensitivity_para(index,1))*ratio;
                 case 2
-                    kr(config.sensitivity_para(index)) = kr(config.sensitivity_para(index))*ratio;
+                    kr(config.sensitivity_para(index,1)) = kr(config.sensitivity_para(index,1))*ratio;
                 case 3
-                    vhc(config.sensitivity_para(index)) = vhc(config.sensitivity_para(index))*ratio;
+                    vhc(config.sensitivity_para(index,1)) = vhc(config.sensitivity_para(index,1))*ratio;
                 case 4
-                    d(config.sensitivity_para(index)) = d(config.sensitivity_para(index))*ratio;
+                    d(config.sensitivity_para(index,1)) = d(config.sensitivity_para(index,1))*ratio;
                 case 5
-                    G(config.sensitivity_para(index)) = G(config.sensitivity_para(index))*ratio;
+                    G(config.sensitivity_para(index,1)) = G(config.sensitivity_para(index,1))*ratio;
             end
         end
         tFun = TheoryData(kz, kr, G, d, vhc, w, time, config);
@@ -816,8 +817,132 @@ if config.Sensitivity == 1
     end
     Sens_file = fopen(fullfile(OutputFolder, 'Sensitivity_data.txt'),'w+');
     fprintf(Sens_file, '%s\r\n', para_name_s);
-    fprintf(Sens_file, form_s, Sens_Data);
+    fprintf(Sens_file, form_s, Sens_Data');
     fclose(Sens_file);
+end
+
+%% ParameterScan calculation model
+if config.ParameterScan == 1
+    NumParame = size(config.parameterScan_para, 1);
+    Numtime = 200;
+    time = linspace(config.tau(1), config.tau(2), Numtime);
+    time_ns = time*1e9;
+    NumXValue = 50;
+    Ratio = 1.01;
+    para_name = getLabel_s(config.LayerName, config.parameterScan_para);
+    para_name_2 = getLabel_s(config.LayerName, config.parameterScan_para(:,5:6));
+    if withInput >= 2
+        OutputPath = varargin{2};
+    else
+        OutputPath = uigetdir('.','Pick a folder to storage the results');
+        if isequal(OutputPath,0)
+            disp('User pressed cancel')
+            fclose all;
+            rmdir(temp_path, 's');data_all
+            return
+        end
+    end
+    IsNotExist = 0;
+    index = 1;
+    while IsNotExist == 0
+        OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
+        OutputFolder = fullfile(OutputPath, OutputFolder);
+        if exist(OutputFolder,'dir') == 0
+            IsNotExist = 1;
+        else
+            index = index + 1;
+        end
+    end
+    mkdir(OutputFolder);
+    copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
+    for index_para = 1:1:NumParame
+        XValue = linspace(config.parameterScan_para(index_para,3), config.parameterScan_para(index_para,4), NumXValue);
+        result = zeros(NumXValue, Numtime);
+        para_name_s = 'Time[ns]';
+        form_s = '%f\t';
+        for indexXValue = 1:1:NumXValue
+            para_name_s = [para_name_s,', ',num2str(XValue(indexXValue))];
+            form_s = [form_s,'%f\t'];
+            kz = config.kz;
+            kr = config.kr;
+            G = config.G;
+            d = config.d;
+            vhc = config.vhc;
+            w = config.w;
+            if config.parameterScan_para(index_para,1) == 0
+                switch config.parameterScan_para(index_para,2)
+                    case 1
+                        w(1) = XValue(indexXValue);
+                    case 2
+                        w(2) = XValue(indexXValue);
+                end
+                config_new = config; 
+            elseif config.parameterScan_para(index_para,1) == -1
+                config_new = config; 
+                config_new.f_mod = XValue(indexXValue);
+            else
+                switch config.parameterScan_para(index_para,2)
+                    case 1
+                        kz(config.paramedata_allterScan_para(index_para,1)) = XValue(indexXValue);
+                    case 2
+                        kr(config.parameterScan_para(index_para,1)) = XValue(indexXValue);
+                    case 3
+                        vhc(config.parameterScan_para(index_para,1)) = XValue(indexXValue);
+                    case 4
+                        d(config.parameterScan_para(index_para,1)) = XValue(indexXValue);
+                    case 5
+                        G(config.parameterScan_para(index_para,1)) = XValue(indexXValue);
+                end
+                config_new = config; 
+            end
+            OriginalFun = TheoryData(kz, kr, G, d, vhc, w, time, config_new);
+            if config.parameterScan_para(index_para,5) == 0
+                switch config.parameterScan_para(index_para,6)
+                    case 1
+                        w(1) = w(1)*Ratio;
+                    case 2
+                        w(2) = w(2)*Ratio;
+                end
+            elseif config.parameterScan_para(index_para,5) == -1
+                config_new.f_mod = config_new.f_mod*Ratio;
+            else
+                switch config.parameterScan_para(index_para,6)
+                    case 1
+                        kz(config.parameterScan_para(index_para,5)) = kz(config.parameterScan_para(index_para,5))*Ratio;
+                    case 2
+                        kr(config.parameterScan_para(index_para,5)) = kr(config.parameterScan_para(index_para,5))*Ratio;
+                    case 3
+                        vhc(config.parameterScan_para(index_para,5)) = vhc(config.parameterScan_para(index_para,5))*Ratio;
+                    case 4
+                        d(config.parameterScan_para(index_para,5)) = d(config.parameterScan_para(index_para,5))*Ratio;
+                    case 5
+                        G(config.parameterScan_para(index_para,5)) = G(config.parameterScan_para(index_para,5))*Ratio;
+                end
+            end
+            tFun = TheoryData(kz, kr, G, d, vhc, w, time, config_new);
+            if config.mode == 'p'
+                result(indexXValue, :) = (tFun-OriginalFun)./log(Ratio);
+            else
+                result(indexXValue, :) = log(tFun./OriginalFun)./log(Ratio);
+            end
+        end
+        form_s = [form_s,'\n'];
+        [XValue_M, Time_M] = meshgrid(time_ns,XValue);
+        fig = figure('Position', fPosition);
+        hold on
+        contourf(XValue_M,Time_M,result,12,'LineStyle','none');
+        colorbar
+        xlabel('Time [ns]');
+        ylabel(para_name{index_para});
+        title(['The sensitivity of ', para_name_2{index_para},' by scanning ', para_name{index_para}]);
+        hold off
+        saveas(fig,fullfile(OutputFolder,[para_name_2{index_para},'__',para_name{index_para},'.png']),'png');
+        Data_file = fopen(fullfile(OutputFolder, [para_name_2{index_para},'__', para_name{index_para},'.txt']),'w+');
+        fprintf(Data_file, '%s\r\n', para_name_s);
+        data_all = [time_ns' result'];
+        fprintf(Data_file, form_s, data_all');
+        fclose(Data_file);
+    end
 end
 
 %% Electron-Phonon Coupling factor
@@ -851,7 +976,7 @@ if config.ElectronPhononMode == 1
         end
         IsNotExist = 0;
         index = 1;
-        while IsNotExist == 0
+        while IsNotExist == 0data_all
             OutputFolder = [datestr(datetime('now'),'yyyy-mm-dd_HH-MM-SS'), '__', num2str(index)];
             OutputFolder = fullfile(OutputPath, OutputFolder);
             if exist(OutputFolder,'dir') == 0
@@ -899,7 +1024,7 @@ if config.ElectronPhononMode == 1
             disp(['File ', num2str(index), ' : ', filelist(index).name]);
             fprintf(result_file,'%5s %3s %3s %s\r\n','File', num2str(index), ':', filelist(index).name);
             % read raw data
-            raw_data = load(fullfile(SourcePath, filelist(index).name));
+            raw_data = load(fullfile(Soudata_allrcePath, filelist(index).name));
             % do the fitting and get result
             Result = TDTR_EP_DataFitting(raw_data, config);
             % save the raw data file to output folder

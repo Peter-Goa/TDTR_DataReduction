@@ -8,9 +8,9 @@ function [para_name] = getLabel_s(LayerName, fit_para)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 length_para = size(fit_para,1);
 para_name = cell(1, length_para);
-LayerName = ['Laser', LayerName];
+LayerName = ['f', 'Laser', LayerName];
 for index_para = 1:1:length_para
-    para_name{index_para} = [para_name{index_para}, LayerName{fit_para(index_para,1)+1}, ' '];
+    para_name{index_para} = [para_name{index_para}, LayerName{fit_para(index_para,1)+2}, ' '];
     if fit_para(index_para,1) == 0
         switch fit_para(index_para, 2)
             case 1
@@ -18,6 +18,8 @@ for index_para = 1:1:length_para
             case 2
                 para_name{index_para} = [para_name{index_para}, 'Dprob'];
         end
+    elseif fit_para(index_para,1) == -1
+        para_name{index_para} = [para_name{index_para}, 'mod'];
     else
         switch fit_para(index_para, 2)
             case 1
