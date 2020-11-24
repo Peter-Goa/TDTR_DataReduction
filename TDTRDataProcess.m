@@ -1252,7 +1252,8 @@ if config.mapping_mode == 1
     fprintf(result_file,'%s\r\n',['There are ', num2str(length_filelist), ' data files will be processed.']);
     % To do some modification of the origina data
     if config.modification_mode == 1
-        TDTRFilePath = uigetfile('.txt','Pick a TDTR data file, which will be used to modify the Offset data');
+        [TDTRFileName, TDTRFileDir] = uigetfile('.txt','Pick a TDTR data file, which will be used to modify the Offset data');
+        TDTRFilePath = fullfile(TDTRFileDir, TDTRFileName);
         if isequal(TDTRFilePath,0)
             disp('User pressed cancel')
             fclose all;
@@ -1260,7 +1261,8 @@ if config.mapping_mode == 1
             return
         end
         raw_data = load(TDTRFilePath);
-        config.modification_value = dealTDTRRawData(raw_data, config.ZeroPointMode);
+        [Delta_tau, Delta_phase] = dealTDTRRawData(raw_data, config.ZeroPointMode);
+        config.modification_value = [Delta_tau, Delta_phase];
     end
     % To deal the index of the results
     [X_max, Y_max, Index_list] = dealFilelist(filelist);
@@ -1305,6 +1307,7 @@ if config.mapping_mode == 1
                 ylabel('Amplitude')
         end
         saveas(fig,fullfile(img_folder,[filelist(index).name(1:end-4),'.png']),'png');
+        close(fig);
         % diaplay the result of fitting
         disp(para_name);
         disp(Result.fittingValue);
@@ -1342,7 +1345,8 @@ if config.mapping_mode == 1
         para_filepath = fullfile(mapping_folder,[para_name_list{index} '.txt']);
         save(para_filepath,'para_data','-ascii');
         fig = figure('Position', fPosition);
-        contourf((1:1:length_x)*config.interval(1), (1:1:length_y)*config.interval(2), para_data);
+        imagesc([0,length_x]*config.interval(1), [0,length_y]*config.interval(2), para_data);
+        axis equal;
         colorbar
         title(para_name_list{index});
         saveas(fig,fullfile(mapping_folder,[para_name_list{index},'.png']),'png');
