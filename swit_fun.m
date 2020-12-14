@@ -2,7 +2,7 @@ function[origin_fun] = swit_fun(X,Y,time,mode)
 
     switch mode
         case 'r'
-            origin_fun = -X./Y;
+            origin_fun = abs(-X./Y);
         case 'p'
             origin_fun = atan(Y./X)*180/pi;
         case 'a'
