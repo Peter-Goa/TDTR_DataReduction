@@ -1,4 +1,4 @@
-function [] = TDTRDataProcess(varargin)                                                                                                                                                                                                function [] = TDTRDataProcess(varargin)
+function [] = TDTRDataProcess(varargin)                                                                                                                                                                                               
 % Main function for the TDTR data processing.
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
@@ -1247,7 +1247,6 @@ if config.mapping_mode == 1
     copyfile(config_file, fullfile(OutputFolder,'configuration.txt'));
     % make result_log file in output folder to save fitting results
     result_file = fopen(fullfile(OutputFolder,'result_log.txt'),'a+');
-
     disp(['There are ', num2str(length_filelist), ' data files will be processed.']);
     fprintf(result_file,'%s\r\n',['There are ', num2str(length_filelist), ' data files will be processed.']);
     % To do some modification of the origina data
@@ -1268,7 +1267,6 @@ if config.mapping_mode == 1
     [X_max, Y_max, Index_list] = dealFilelist(filelist);
     Results = zeros(length_filelist,length_para);
     Results_matrix = zeros(X_max, Y_max, length_para);
-    
     for index = 1:1:length_filelist
         disp(['File ', num2str(index), ' : ', filelist(index).name]);
         fprintf(result_file,'%5s %3s %3s %s\r\n','File', num2str(index), ':', filelist(index).name);
@@ -1283,6 +1281,12 @@ if config.mapping_mode == 1
         dealed_data_file = fopen(fullfile(dealed_data_folder, filelist(index).name),'w+');
         fprintf(dealed_data_file, '%f\t%f\r\n', [Result.dealed_data.tau(:)'; Result.dealed_data.fun(:)']);
         fclose(dealed_data_file);
+        if index == 1
+            Data_length = size(Result.dealed_data.tau(:),1);
+            Data_Matrix = zeros(X_max, Y_max, Data_length);
+            Time_list = Result.dealed_data.tau(:)';
+        end
+        Data_Matrix(Index_list(index,1),Index_list(index,2),:) = Result.dealed_data.fun(:);
         % save the theory data to output file
         theory_data_file = fopen(fullfile(theory_data_folder, filelist(index).name),'w+');
         fprintf(theory_data_file, '%f\t%f\r\n', [Result.theory_data.tau(:)'; Result.theory_data.fun(:)']);
@@ -1338,19 +1342,44 @@ if config.mapping_mode == 1
     % make the image folder
     mapping_folder = fullfile(OutputFolder,'mapping');
     mkdir(mapping_folder);
+    mapping_parameter_folder = fullfile(mapping_folder,'parameters');
+    mkdir(mapping_parameter_folder);
     for index = 1:1:length_para
         para_data = Results_matrix(:,:,index);
         length_x = size(para_data,2);
         length_y = size(para_data,1);
-        para_filepath = fullfile(mapping_folder,[para_name_list{index} '.txt']);
+        para_filepath = fullfile(mapping_parameter_folder,[para_name_list{index} '.txt']);
         save(para_filepath,'para_data','-ascii');
         fig = figure('Position', fPosition);
         imagesc([0,length_x]*config.interval(1), [0,length_y]*config.interval(2), para_data);
         axis equal;
         colorbar
         title(para_name_list{index});
-        saveas(fig,fullfile(mapping_folder,[para_name_list{index},'.png']),'png');
-    end   
+        saveas(fig,fullfile(mapping_parameter_folder,[para_name_list{index},'.png']),'png');
+    end
+    mapping_data_folder = fullfile(mapping_folder, 'data');
+    mkdir(mapping_data_folder);
+    for index = 1:1:Data_length
+        data = Data_Matrix(:,:,index);
+        length_x = size(data,2);
+        length_y = size(data,1);
+        switch config.mode
+            case 'r'
+                data_type = 'Ratio';
+            case 'p'
+                data_type = 'Phase';
+            case 'a'
+                data_type = 'Amplitude';
+        end
+        data_filepath = fullfile(mapping_data_folder,['time:' num2str(Time_list(index)) 'ns(' data_type ').txt']);
+        save(data_filepath,'data','-ascii');
+        fig = figure('Position', fPosition);
+        imagesc([0,length_x]*config.interval(1), [0,length_y]*config.interval(2), data);
+        axis equal;
+        colorbar
+        title(['time:' num2str(Time_list(index)) 'ns(' data_type ')']);
+        saveas(fig,fullfile(mapping_data_folder,['time:' num2str(Time_list(index)) 'ns(' data_type ').png']),'png');
+    end
 end
 
 %% close file and delete the temp folder
