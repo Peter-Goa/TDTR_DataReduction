@@ -1,4 +1,4 @@
-function [] = TDTRDataProcess(varargin)                                                                                                                                                                                               
+function [] = TDTRDataProcess(varargin)
 % Main function for the TDTR data processing.
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
