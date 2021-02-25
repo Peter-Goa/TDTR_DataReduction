@@ -1371,14 +1371,14 @@ if config.mapping_mode == 1
             case 'a'
                 data_type = 'Amplitude';
         end
-        data_filepath = fullfile(mapping_data_folder,['time:' num2str(Time_list(index)) 'ns(' data_type ').txt']);
+        data_filepath = fullfile(mapping_data_folder,['time-' num2str(Time_list(index)) 'ns(' data_type ').txt']);
         save(data_filepath,'data','-ascii');
         fig = figure('Position', fPosition);
         imagesc([0,length_x]*config.interval(1), [0,length_y]*config.interval(2), data);
         axis equal;
         colorbar
         title(['time:' num2str(Time_list(index)) 'ns(' data_type ')']);
-        saveas(fig,fullfile(mapping_data_folder,['time:' num2str(Time_list(index)) 'ns(' data_type ').png']),'png');
+        saveas(fig,fullfile(mapping_data_folder,['time-' num2str(Time_list(index)) 'ns(' data_type ').png']),'png');
     end
 end
 
