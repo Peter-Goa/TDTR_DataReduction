@@ -32,7 +32,7 @@ function [Result] = TDTRDataFitting(raw_data, config)
         end
     end
     lb = config.fit_para(:, 4)'./value_0;
-    ub = config.fit_para(:, 5)'./value_0;
+    ub = config.fit_para(:, 5)'./value_0;  
     %func = @(beta) getDevOfT_P(k_0, beta(1)*ky_1, beta(2)*kxy_1, k_2, Cv_0, beta(3)*Cv_1, Cv_2, d, freq, b, beta(4)*R, l, T_P_Exp);
     func = @(beta) Costfunction_assist(beta, tau_data, fun_data, config);
 
