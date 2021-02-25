@@ -1379,6 +1379,7 @@ if config.mapping_mode == 1
         colorbar
         title(['time:' num2str(Time_list(index)) 'ns(' data_type ')']);
         saveas(fig,fullfile(mapping_data_folder,['time-' num2str(Time_list(index)) 'ns(' data_type ').png']),'png');
+        close(fig);
     end
 end
 
