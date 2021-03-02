@@ -6,3 +6,4 @@ Configration/*.*
 *.prj
 *.mlappinstall
 runCase.m
+*.m~
