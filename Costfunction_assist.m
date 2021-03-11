@@ -23,6 +23,23 @@ function [cost] = Costfunction_assist(beta, tau_data, fun_data, config)
                 G(config.fit_para(index,1)) = value_0(index)*beta(index);
         end
     end
+    % equivalent parameter
+    if isfield(config, 'equal_para')
+        for index = 1:1:size(config.equal_para,1)
+            switch config.equal_para(index,3)
+                case 1
+                    kz(config.equal_para(index,2)) = value_0(config.equal_para(index,1))*beta(config.equal_para(index,1));
+                case 2
+                    kr(config.equal_para(index,2)) = value_0(config.equal_para(index,1))*beta(config.equal_para(index,1));
+                case 3
+                    vhc(config.equal_para(index,2)) = value_0(config.equal_para(index,1))*beta(config.equal_para(index,1));
+                case 4
+                    d(config.equal_para(index,2)) = value_0(config.equal_para(index,1))*beta(config.equal_para(index,1));
+                case 5
+                    G(config.equal_para(index,2)) = value_0(config.equal_para(index,1))*beta(config.equal_para(index,1));
+            end
+        end
+    end
     NLayer = size(config.kz, 2);
     for index = 1:1:NLayer
         if config.iso(index) == 1

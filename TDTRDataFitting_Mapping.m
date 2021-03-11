@@ -1,4 +1,4 @@
-function [Result] = TDTRDataFitting(raw_data, config)
+function [Result] = TDTRDataFitting_Mapping(raw_data, config)
 % Fit the TDTR Data to get wanted parameter
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
